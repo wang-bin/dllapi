@@ -25,40 +25,63 @@
 ******************************************************************************/
 
 #include "dllapi.h"
+#include "dllapi_p.h"
+//#include <algorithm>
+//#include <functional>
 #include <map>
 #include <string>
 #include <QtCore/QLibrary>
 
-using namespace std;
-
 namespace DllAPI {
 
-typedef map<std::string, QLibrary*> dllmap_t;
+bool testLoad(const char *dllname)
+{
+    if (library(dllname))
+        return true;
+    return load(dllname);
+}
+
+
+typedef std::map<std::string, QLibrary*> dllmap_t;
 static dllmap_t sDllMap;
 
 bool load(const char* dllname)
 {
+    if (library(dllname)) {
+        DBG("'%s' is already loaded\n", dllname);
+        return true;
+    }
     QLibrary *dll = new QLibrary(dllname) ;
     if (!dll)
         return false;
     if (!dll->load()) {
-        qDebug("%s", dll->errorString().toUtf8().constData());
+        DBG("%s", dll->errorString().toLocal8Bit().constData()); //why qDebug use toUtf8() and printf use toLocal8Bit()?
         return false;
     }
     sDllMap[dllname] = dll; //map.insert will not replace the old one
     return true;
 }
 
+template<class StdMap>
+class map_value_equal : public std::binary_function<typename StdMap::value_type, typename StdMap::mapped_type, bool>
+{ //why is value_type but not const_iterator?
+public:
+    bool operator() (typename StdMap::value_type it, typename StdMap::mapped_type v) const {return it.second == v;}
+};
+
 bool unload(const char* dllname)
 {
-    dllmap_t::iterator it = sDllMap.find(dllname);
-    if (it == sDllMap.end())
-        return false;
-    if (!it->second->unload()) {
-        qDebug("%s", it->second->errorString().toUtf8().constData());
+    QLibrary *dll = library(dllname);
+    if (!dll) {
+        DBG("'%s' is not loaded\n", dllname);
+        return true;
+    }
+    if (!dll->unload()) {
+        DBG("%s", dll->errorString().toUtf8().constData());
         return false;
     }
-    sDllMap.erase(it);
+    sDllMap.erase(std::find_if(sDllMap.begin(), sDllMap.end(), std::bind2nd(map_value_equal<dllmap_t>(), dll))->first);
+    delete dll;
     return true;
 }
 
@@ -70,4 +93,4 @@ QLibrary* library(const char *dllname)
     return it->second;
 }
 
-}
+} //namespace DllAPI

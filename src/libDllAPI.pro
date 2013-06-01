@@ -18,7 +18,8 @@ else:win32: SOURCES +=
 
 SOURCES += dllapi.cpp
 
-HEADERS += dllapi_global.h dllapi.h
+HEADERS += dllapi_global.h dllapi.h \
+    dllapi_p.h
 
 
 
