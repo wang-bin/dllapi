@@ -54,20 +54,21 @@
    using namespace DllAPI::SomeLib;
    to enable dynamically loading api instead of linked api. of cause, you should not link to that lib from then on.
 */
+#include "dllapi_global.h"
 
 namespace DllAPI {
 
 /* use this to test whether the library can be loaded. It will try load if not loaded.
  *return true if already loaded or load success.
  */
-bool testLoad(const char* dllname);
+Q_EXPORT bool testLoad(const char* dllname);
 /*
  * insert (std::string dllname, dllptr) to a map
  * they are used in xxx.cpp xxx.ctor/dtor for the most time
  * usually you don't need to call them
  */
-bool load(const char* dllname);
-bool unload(const char* dllname);
+Q_EXPORT bool load(const char* dllname);
+Q_EXPORT bool unload(const char* dllname);
 
 } //namespace DllAPI
 

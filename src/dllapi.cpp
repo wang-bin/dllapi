@@ -26,8 +26,8 @@
 
 #include "dllapi.h"
 #include "dllapi_p.h"
-//#include <algorithm>
-//#include <functional>
+#include <algorithm>
+#include <functional>
 #include <map>
 #include <string>
 #include <QtCore/QLibrary>

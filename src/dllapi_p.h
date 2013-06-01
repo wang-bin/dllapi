@@ -58,7 +58,7 @@ namespace DllAPI {
  * this file is only used in xxx.cpp, e.g. dllapi/CL/cl.cpp
  * and dllapi/CL/cl.h is clean, only CL/cl.h content and DllAPI::OpenCL namespace
  */
-QLibrary* library(const char* dllname); //TODO: return pair? it's already private
+Q_EXPORT QLibrary* library(const char* dllname); //TODO: return pair? it's already private
 
 /********************************** The following code is only used in .cpp **************************************************/
 //e.g. DEFINE_DLLAPI_SYM_ARG(3, cl_int, clGetPlatformIDs, cl_uint, cl_platform_id*, cl_uint*)
@@ -88,12 +88,15 @@ struct Default {
 };
 template<typename T>
 struct Default<T*> {
-    static T* value = 0;
+    static T* value;
 };
+template<typename T> T* Default<T*>::value = 0;
+
 template<typename T>
 struct Default<T&> {
-    static T& value = Default<T>::value; //int*&, int&&
+    static T& value;
 };
+template<typename T> T& Default<T&>::value = Default<T>::value; //int*&, int&&
 template<>
 struct Default<void*> {
     //static const int value = 0; //static const void* value = 0: invalid in-class initialization of static data member of non-integral type 'const void*'
@@ -122,7 +125,7 @@ struct Default<void*> {
             DBG("%s\n", DLLAPI_FUNC); \
             if (!mLoaded) \
                 return 0; \
-            return DllAPI::library(dllname)->resolve(sym); \
+            return (void*)DllAPI::library(dllname)->resolve(sym); \
         } \
     private: \
         dll() { mLoaded = testLoad(dllname); } \
