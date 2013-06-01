@@ -49,7 +49,7 @@ NAME = DllAPI
 #!isEmpty(LIBDLLAPI_PRI_INCLUDED):error("libDllAPI.pri already included")
 eval(LIB$$upper($$NAME)_PRI_INCLUDED = 1)
 
-LIB_VERSION = 0.0.0 #0.x.y may be wrong for dll
+LIB_VERSION = 1.0.0 #0.x.y may be wrong for dll
 isEmpty(STATICLINK): STATICLINK = 0  #1 or 0. use static lib or not
 
 TEMPLATE += fakelib
@@ -80,12 +80,12 @@ QMAKE_LFLAGS_RPATH += #will append to rpath dir
 	CONFIG *= link_prl
 	LIBS *= -L$$PROJECT_LIBDIR -l$$qtLibName($$NAME)
 	isEqual(STATICLINK, 1) {
-		PRE_TARGETDEPS += $$PROJECT_LIBDIR/$$qtStaticLib($$NAME)
+                PRE_TARGETDEPS += $$PROJECT_LIBDIR/$$qtStaticLib($$NAME)
 	} else {
 		win32 {
 			PRE_TARGETDEPS *= $$PROJECT_LIBDIR/$$qtSharedLib($$NAME, $$LIB_VERSION)
 		} else {
-			PRE_TARGETDEPS *= $$PROJECT_LIBDIR/$$qtSharedLib($$NAME)
+                        PRE_TARGETDEPS *= $$PROJECT_LIBDIR/$$qtSharedLib($$NAME)
 # $$[QT_INSTALL_LIBS] and $$DESTDIR will be auto added to rpath
 # Current (sub)project dir is auto added to the first value as prefix. e.g. QMAKE_RPATHDIR = .. ==> -Wl,-rpath,ROOT/.. 
 # Executable dir search: ld -z origin, g++ -Wl,-R,'$ORIGIN', in makefile -Wl,-R,'$$ORIGIN'
@@ -107,7 +107,7 @@ QMAKE_LFLAGS_RPATH += #will append to rpath dir
 	TARGET = $$PROJECT_TARGETNAME
 	DESTDIR= $$PROJECT_LIBDIR
 
-	CONFIG *= create_prl #
+        CONFIG *= create_prl #
 	isEqual(STATICLINK, 1) {
 		CONFIG -= shared dll ##otherwise the following shared is true, why?
 		CONFIG *= staticlib

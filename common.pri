@@ -84,10 +84,10 @@ defineReplace(qtLibName) {
 	else: VERSION_EXT = $$2
 	!isEmpty(VERSION_EXT) {
 		VERSION_EXT = $$section(VERSION_EXT, ., 0, 0)
-		#isEqual(VERSION_EXT, 0):unset(VERSION_EXT)
-	}
-	RET = $${RET}$${VERSION_EXT}
-	unset(VERSION_EXT)
+                #isEqual(VERSION_EXT, 0):unset(VERSION_EXT)
+        }
+        RET = $${RET}$${VERSION_EXT}
+        unset(VERSION_EXT)
 	return($$RET)
 }
 
