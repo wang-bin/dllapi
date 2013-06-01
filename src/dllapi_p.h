@@ -48,8 +48,8 @@
 #   endif
 #endif
 
+#include <QtCore/QLibrary>
 
-class QLibrary;
 namespace DllAPI {
 
 /*
@@ -62,12 +62,12 @@ Q_EXPORT QLibrary* library(const char* dllname); //TODO: return pair? it's alrea
 
 /********************************** The following code is only used in .cpp **************************************************/
 //e.g. DEFINE_DLLAPI_SYM_ARG(3, cl_int, clGetPlatformIDs, cl_uint, cl_platform_id*, cl_uint*)
-#define DEFINE_DLLAPI_ARG(N, R, name, P) DEFINE_DLLAPI_SYM_ARG##N(R, name, #name, P)
+#define DEFINE_DLLAPI_ARG(N, R, name, ...) DEFINE_DLLAPI_SYM_ARG##N(R, name, #name, ##__VA_ARGS__)
 /*
  * used by .cpp to define the api
  *  e.g. DEFINE_DLLAPI_SYM_ARG3(cl_int, clGetPlatformIDs, "clGetPlatformIDs", cl_uint, cl_platform_id*, cl_uint*)
  */
-#define DEFINE_DLLAPI_SYM_ARG0(R, name, sym, P) DEFINE_DLLAPI_ARG(R, name, sym, (), (), ())
+#define DEFINE_DLLAPI_SYM_ARG0(R, name, sym, ...) DEFINE_DLLAPI_SYM_ARG_T_V(R, name, sym, (), (), ())
 #define DEFINE_DLLAPI_SYM_ARG1(R, name, sym, P1) DEFINE_DLLAPI_SYM_ARG_T_V(R, name, sym, (P1), (P1 p1), (p1))
 #define DEFINE_DLLAPI_SYM_ARG2(R, name, sym, P1, P2) DEFINE_DLLAPI_SYM_ARG_T_V(R, name, sym, (P1, P2), (P1 p1, P2 p2), (p1, p2))
 #define DEFINE_DLLAPI_SYM_ARG3(R, name, sym, P1, P2, P3) DEFINE_DLLAPI_SYM_ARG_T_V(R, name, sym, (P1, P2, P3), (P1 p1, P2 p2, P3 p3), (p1, p2, p3))
@@ -82,9 +82,24 @@ Q_EXPORT QLibrary* library(const char* dllname); //TODO: return pair? it's alrea
 #define DEFINE_DLLAPI_SYM_ARG12(R, name, sym, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12) DEFINE_DLLAPI_SYM_ARG_T_V(R, name, sym, (P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12), (P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10, P11 p11, P12 p12), (p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12))
 #define DEFINE_DLLAPI_SYM_ARG13(R, name, sym, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13) DEFINE_DLLAPI_SYM_ARG_T_V(R, name, sym, (P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13), (P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10, P11 p11, P12 p12, P13 p13), (p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13))
 
+
+
+template<typename T>
+struct IsVoid {
+    static const int value = 0;
+};
+template<>
+struct IsVoid<void> {
+    static const int value = 1;
+};
+
 template<typename T>
 struct Default {
-    static T value = T();
+    static const T value = T();
+};
+template<>
+struct Default<void> {
+    static const int value = 0;
 };
 template<typename T>
 struct Default<T*> {
@@ -108,7 +123,7 @@ struct Default<void*> {
         static api_t api = (api_t)dll::instance().resolve(sym); \
         if (!api) { \
             fprintf(stderr, "resolve symbol '%s' failed!\n", sym); \
-            return (R)Default<R>::value; \
+            if (!IsVoid<R>::value) return (R)Default<R>::value; \
         } \
         return api ARG_V; \
     }
