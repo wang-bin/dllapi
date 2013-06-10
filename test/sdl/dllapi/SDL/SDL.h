@@ -19,8 +19,6 @@ namespace SDL {
 extern DECLSPEC int SDLCALL SDL_Init(Uint32 flags);
 extern DECLSPEC void SDLCALL SDL_Quit(void);
 extern DECLSPEC int SDLCALL SDL_PollEvent(SDL_Event *event);
-
-
 extern DECLSPEC SDL_Surface * SDLCALL SDL_SetVideoMode
             (int width, int height, int bpp, Uint32 flags);
 }
