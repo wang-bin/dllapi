@@ -17,7 +17,8 @@ For example, you have an SDL app linked to SDL library. If you want to let it su
 The original source code using SDL:
 
 >main.cpp
-```cpp
+
+`
 #include "SDL/SDL.h"
 
 int main()
@@ -34,7 +35,7 @@ int main()
     SDL_Quit();
     return 0;
 }
-```
+`
 ####Step 1: create a header with dllapi
 
 This step is quite easy. The header is **created once use forever!**
@@ -42,7 +43,8 @@ This step is quite easy. The header is **created once use forever!**
 Here is a simple SDL example:
 
 >dllapi/SDL/SDL.h
-```cpp
+
+`
 #ifndef DLLAPI_SDL_H
 #define DLLAPI_SDL_H
 
@@ -69,14 +71,15 @@ extern DECLSPEC void SDLCALL SDL_WM_SetCaption(const char *title, const char *ic
 } //namespace SDL
 } //namespace DllAPI
 #endif // DLLAPI_SDL_H
-```
+`
 
 NOTE: you may simply include "SDL/SDL.h" in the namespace and do nothing else if that gives no compile error! 
 
 Or you can include the api you want, including requred consts and macros. The api in the namespace `DllAPI/SDL` are **JUST Copy from original headers**
 
 >dllapi/SDL/SDL.cpp
-```cpp
+
+`
 #include "dllapi_p.h"
 #include "dllapi.h"
 #include "SDL.h"
@@ -93,7 +96,7 @@ DEFINE_DLLAPI_ARG(0, void, SDL_Quit)
 
 } //namespace SDL
 } //namespace DllAPI
-```
+`
 
 `DEFINE_DLL_INSTANCE` defines the library name. "SDL" is SDL.dll in windows, libSDL.so in linux and libSDL.dylib in mac.
 
@@ -106,7 +109,8 @@ The new header(SDL.h) and source(SDL.cpp) can be used for other code contains SD
 In this example, in main.cpp, you just replace `#include <SDL/SDL.h>` by `#include "dllapi/SDL/SDL.h"`, and add `using namespace DllAPI::SDL;`. Then compile main.cpp without linking to SDL. Now all SDL functions are loaded dynamically.
 
 >main.cpp(dynamically loaded symbols):
-```cpp
+
+`
 #include "dllapi/SDL/SDL.h"
 using namespace DllAPI::SDL;
 
@@ -124,7 +128,7 @@ int main()
     SDL_Quit();
     return 0;
 }
-```
+`
 
 ###Performance
 
