@@ -19,7 +19,7 @@ The original source code using SDL:
 >main.cpp
 
 
-    #include "SDL/SDL.h"
+    #include <SDL/SDL.h>
 
     int main()
     {
@@ -40,6 +40,10 @@ The original source code using SDL:
 ####Step 1: create a header with dllapi
 
 This step is quite easy. The header is **created once use forever!**
+
+NOTE: you may simply include "SDL/SDL.h" in the namespace and do nothing else if that gives no compile error! 
+
+Or you can include the api you want, including requred consts and macros. The api in the namespace `DllAPI/SDL` are **JUST Copy from original headers**
 
 Here is a simple SDL example:
 
@@ -73,10 +77,6 @@ Here is a simple SDL example:
     } //namespace DllAPI
     #endif // DLLAPI_SDL_H
 
-
-NOTE: you may simply include "SDL/SDL.h" in the namespace and do nothing else if that gives no compile error! 
-
-Or you can include the api you want, including requred consts and macros. The api in the namespace `DllAPI/SDL` are **JUST Copy from original headers**
 
 >dllapi/SDL/SDL.cpp
 
@@ -133,7 +133,7 @@ In this example, in main.cpp, you just replace `#include <SDL/SDL.h>` by `#inclu
 
 ###Performance
 
-Comparing with linked symbols, calling this dynamically loaded symbol just cost **1 more** function calls. So the performance is obviously very well.
+Comparing with linked symbols, calling this dynamically loaded symbol just cost **1 more** function call. So the performance is obviously very well.
 
 ###TODO
 
