@@ -64,11 +64,19 @@ Q_EXPORT QLibrary* library(const char* dllname); //TODO: return pair? it's alrea
 //e.g. DEFINE_DLLAPI_SYM_ARG(3, cl_int, clGetPlatformIDs, cl_uint, cl_platform_id*, cl_uint*)
 //fully expand. used by VC. VC will not expand __VA_ARGS__ but treats it as 1 parameter
 #define EXPAND(expr) expr
+/*!
+ * N: number of arguments
+ * R: return type
+ * name: api name
+ * ...: api arguments with only types
+ * The symbol of the api is "name". Otherwise, use DEFINE_DLLAPI_SYM_ARGN instead.
+ */
 #define DEFINE_DLLAPI_ARG(N, R, name, ...) \
     EXPAND(DEFINE_DLLAPI_SYM_ARG##N(R, name, #name, __VA_ARGS__))
-/*
+/*!
  * used by .cpp to define the api
  *  e.g. DEFINE_DLLAPI_SYM_ARG3(cl_int, clGetPlatformIDs, "clGetPlatformIDs", cl_uint, cl_platform_id*, cl_uint*)
+ * sym: symbol of the api in library.
  */
 #define DEFINE_DLLAPI_SYM_ARG0(R, name, sym, ...) DEFINE_DLLAPI_SYM_ARG_T_V(R, name, sym, (), (), ())
 #define DEFINE_DLLAPI_SYM_ARG1(R, name, sym, P1) DEFINE_DLLAPI_SYM_ARG_T_V(R, name, sym, (P1), (P1 p1), (p1))

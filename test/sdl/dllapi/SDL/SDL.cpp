@@ -12,5 +12,5 @@ DEFINE_DLLAPI_ARG(1, int, SDL_PollEvent, SDL_Event*)
 DEFINE_DLLAPI_ARG(4, SDL_Surface*, SDL_SetVideoMode, int, int, int, Uint32)
 DEFINE_DLLAPI_ARG(0, void, SDL_Quit)
 
-}
-}
+} //namespace SDL
+} //namespace DllAPI
