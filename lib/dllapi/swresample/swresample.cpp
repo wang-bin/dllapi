@@ -5,7 +5,12 @@
 namespace DllAPI {
 namespace swresample {
 
+#ifdef Q_OS_WIN
+DEFINE_DLL_INSTANCE("swresample-0")
+#else
 DEFINE_DLL_INSTANCE("swresample")
+#endif
+
 DEFINE_DLLAPI_ARG(0, const AVClass *, swr_get_class)
 DEFINE_DLLAPI_ARG(0, struct SwrContext *, swr_alloc)
 DEFINE_DLLAPI_ARG(1, int, swr_init, struct SwrContext *)

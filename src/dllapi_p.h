@@ -139,7 +139,7 @@ struct Default<void*> {
         return api ARG_V; \
     }
 
-
+//TODO: add multiple dll names support. e.g. in unix it's OpenGL, in windows is OpenGL32
 #define DEFINE_DLL_INSTANCE(dllname) \
     class dll { \
     public: \
@@ -148,7 +148,7 @@ struct Default<void*> {
             return d; \
         } \
         void* resolve(const char* sym) { \
-            DBG("%s\n", DLLAPI_FUNC); \
+            DBG("%s (symbol: %s)\n", DLLAPI_FUNC, sym); \
             if (!mLoaded) \
                 return 0; \
             return (void*)DllAPI::library(dllname)->resolve(sym); \
