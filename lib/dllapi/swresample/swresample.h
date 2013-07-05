@@ -94,13 +94,15 @@
  */
 
 #include <stdint.h> //int64_t, int8_t
-//#include "libavutil/samplefmt.h"
+#include "libavutil/samplefmt.h"
 //#include "libswresample/version.h"
 
 namespace DllAPI {
 namespace swresample {
 
 //TODO: what about enum value changes?
+//avutil may includes samplefmt.h
+#ifndef AVUTIL_SAMPLEFMT_H
 /**
  * Audio Sample Formats
  *
@@ -139,7 +141,7 @@ enum AVSampleFormat {
 
     AV_SAMPLE_FMT_NB           ///< Number of sample formats. DO NOT USE if linking dynamically
 };
-
+#endif //AVUTIL_SAMPLEFMT_H
 //the compile time version does not matter. just copy
 /**
  * @defgroup version_utils Library Version Macros
