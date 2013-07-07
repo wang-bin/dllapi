@@ -55,11 +55,18 @@
    to enable dynamically loading api instead of linked api. of cause, you should not link to that lib from then on.
 */
 #include "dllapi_global.h"
+#include <list>
+#include <string>
 
 namespace DllAPI {
 
+Q_EXPORT void setSearchPaths(const std::list<std::string>& paths);
+Q_EXPORT std::list<std::string> getSearchPaths();
 /* use this to test whether the library can be loaded. It will try load if not loaded.
  *return true if already loaded or load success.
+ * dllname can be standard name which is used as id internally, for example 'OpenAL' can be 'OpenAL' and 'OpenAL32'
+ * , defined in OpenAL.cpp. Search in this id first. If found, use it. Otherwise go back to normal dll search by dllname
+ *
  */
 Q_EXPORT bool testLoad(const char* dllname);
 /*

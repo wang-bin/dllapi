@@ -34,6 +34,15 @@
 
 namespace DllAPI {
 
+void setSearchPaths(const std::list<std::string>& paths)
+{
+}
+
+std::list<std::string> getSearchPaths()
+{
+	return std::list<std::string>();
+}
+
 bool testLoad(const char *dllname)
 {
     if (library(dllname))
