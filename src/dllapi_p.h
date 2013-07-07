@@ -140,6 +140,15 @@ struct Default<void*> {
     }
 
 
+/*
+ * TODO: dllname used as id. e.g. on windows, 'OpenAL' may be 'OpenAL32.dll', we should add both OpenAL.dll and OpenAL32.dll. The dllid is also used 
+ * Of cause, we can use platform macros to choose the dll names
+ * DEFINE_DLL_INSTANCE_N("OpenAL"
+ * #ifdef __WIN32
+ * 	, "OpenAL32"
+ * #else if ...
+ */
+#define DEFINE_DLL_INSTANCE_N(dllid, ...) //vaarg
 #define DEFINE_DLL_INSTANCE(dllname) \
     class dll { \
     public: \
