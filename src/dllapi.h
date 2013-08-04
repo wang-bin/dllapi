@@ -61,7 +61,15 @@
 namespace DllAPI {
 
 Q_EXPORT void setSearchPaths(const std::list<std::string>& paths);
+Q_EXPORT void addSearchPaths(const std::list<std::string>& paths);
+Q_EXPORT void removeSearchPaths(const std::list<std::string>& paths);
 Q_EXPORT std::list<std::string> getSearchPaths();
+//e.g. setLibraryNames("GL", list<string>() << "GL" << "OpenGL" << "OpenGL32");
+Q_EXPORT void setLibraryNames(const std::string& lib, const std::list<std::string>& names);
+Q_EXPORT void addLibraryNames(const std::string& lib, const std::list<std::string>& names);
+Q_EXPORT void removeLibraryNames(const std::string& lib, const std::list<std::string>& names);
+Q_EXPORT std::list<std::string> getLibraryNames(const std::string& lib);
+
 /* use this to test whether the library can be loaded. It will try load if not loaded.
  *return true if already loaded or load success.
  * dllname can be standard name which is used as id internally, for example 'OpenAL' can be 'OpenAL' and 'OpenAL32'
