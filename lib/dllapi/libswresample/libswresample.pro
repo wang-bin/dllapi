@@ -2,6 +2,7 @@ TEMPLATE = lib
 QT = core
 CONFIG -= shared dll ##otherwise the following shared is true, why?
 CONFIG *= staticlib
+DEFINES += __STDC_CONSTANT_MACROS
 
 STATICLINK = 0
 PROJECTROOT = $$PWD/../../..

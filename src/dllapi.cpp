@@ -32,7 +32,76 @@
 #include <string>
 #include <QtCore/QLibrary>
 
+/*TODO:
+ *
+ * 1. search path implemention. or use qApp->addLibraryPath() out side
+ * 2. lib depended search dirs
+ */
+
 namespace DllAPI {
+static std::list<std::string> sLibDirs;
+
+void setSearchPaths(const std::list<std::string>& paths)
+{
+    sLibDirs = paths;
+}
+
+void addSearchPaths(const std::list<std::string>& paths)
+{
+    for (std::list<std::string>::const_iterator it = paths.begin();
+         it != paths.end(); ++it) {
+        if (std::find(sLibDirs.begin(), sLibDirs.end(), *it) == sLibDirs.end()) {
+            sLibDirs.push_back(*it);
+        }
+    }
+}
+
+void removeSearchPaths(const std::list<std::string> &paths)
+{
+    for (std::list<std::string>::const_iterator it = paths.begin();
+         it != paths.end(); ++it) {
+        std::remove_if(sLibDirs.begin(), sLibDirs.end(), std::bind2nd(std::equal_to<std::string>(), *it));
+    }
+}
+
+std::list<std::string> getSearchPaths()
+{
+    return sLibDirs;
+}
+
+typedef std::map<std::string, std::list<std::string> > lib_names_map_t;
+static lib_names_map_t sLibNamesMap;
+void setLibraryNames(const std::string& lib, const std::list<std::string>& names)
+{
+    sLibNamesMap[lib] = names;
+}
+
+void addLibraryNames(const std::string& lib, const std::list<std::string>& names)
+{
+    std::list<std::string> &libnames = sLibNamesMap[lib];
+    if (libnames.empty())
+        libnames.push_back(lib);
+    for (std::list<std::string>::const_iterator it = names.begin();
+         it != names.end(); ++it) {
+        if (std::find(libnames.begin(), libnames.end(), *it) == libnames.end()) {
+            libnames.push_back(*it);
+        }
+    }
+}
+
+void removeLibraryNames(const std::string& lib, const std::list<std::string>& names)
+{
+    std::list<std::string> &libnames = sLibNamesMap[lib];
+    for (std::list<std::string>::const_iterator it = names.begin();
+         it != names.end(); ++it) {
+        std::remove_if(libnames.begin(), libnames.end(), std::bind2nd(std::equal_to<std::string>(), *it));
+    }
+}
+
+std::list<std::string> getLibraryNames(const std::string& lib)
+{
+    return sLibNamesMap[lib];
+}
 
 bool testLoad(const char *dllname)
 {
@@ -51,13 +120,23 @@ bool load(const char* dllname)
         DBG("'%s' is already loaded\n", dllname);
         return true;
     }
-    QLibrary *dll = new QLibrary(dllname) ;
-    if (!dll)
-        return false;
-    if (!dll->load()) {
-        DBG("%s", dll->errorString().toLocal8Bit().constData()); //why qDebug use toUtf8() and printf use toLocal8Bit()?
+    std::list<std::string> libnames = sLibNamesMap[dllname];
+    if (libnames.empty())
+        libnames.push_back(dllname);
+    std::list<std::string>::const_iterator it;
+    QLibrary *dll = new QLibrary();
+    for (it = libnames.begin(); it != libnames.end(); ++it) {
+        dll->setFileName((*it).c_str());
+        if (dll->load())
+            break;
+        DBG("%s\n", dll->errorString().toLocal8Bit().constData()); //why qDebug use toUtf8() and printf use toLocal8Bit()?
+    }
+    if (it == libnames.end()) {
+        DBG("No dll loaded\n");
+        delete dll;
         return false;
     }
+    DBG("'%s' is loaded~~~\n", dll->fileName().toUtf8().constData());
     sDllMap[dllname] = dll; //map.insert will not replace the old one
     return true;
 }
