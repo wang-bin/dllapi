@@ -34,7 +34,7 @@
 
 /*TODO:
  *
- * 1. search path implemention
+ * 1. search path implemention. or use qApp->addLibraryPath() out side
  * 2. lib depended search dirs
  */
 
@@ -139,17 +139,6 @@ bool load(const char* dllname)
     DBG("'%s' is loaded~~~\n", dll->fileName().toUtf8().constData());
     sDllMap[dllname] = dll; //map.insert will not replace the old one
     return true;
-#if 0
-    QLibrary *dll = new QLibrary(dllname);
-    if (!dll)
-        return false;
-    if (!dll->load()) {
-        DBG("%s\n", dll->errorString().toLocal8Bit().constData()); //why qDebug use toUtf8() and printf use toLocal8Bit()?
-        return false;
-    }
-    sDllMap[dllname] = dll; //map.insert will not replace the old one
-    return true;
-#endif
 }
 
 template<class StdMap>

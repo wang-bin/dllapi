@@ -60,10 +60,10 @@
 
 namespace DllAPI {
 
-Q_EXPORT void setSearchPaths(const std::list<std::string>& paths);
-Q_EXPORT void addSearchPaths(const std::list<std::string>& paths);
-Q_EXPORT void removeSearchPaths(const std::list<std::string>& paths);
-Q_EXPORT std::list<std::string> getSearchPaths();
+Q_EXPORT void setSearchDirs(const std::list<std::string>& paths);
+Q_EXPORT void addSearchDirs(const std::list<std::string>& paths);
+Q_EXPORT void removeSearchDirs(const std::list<std::string>& paths);
+Q_EXPORT std::list<std::string> getSearchDirs();
 //e.g. setLibraryNames("GL", list<string>() << "GL" << "OpenGL" << "OpenGL32");
 Q_EXPORT void setLibraryNames(const std::string& lib, const std::list<std::string>& names);
 Q_EXPORT void addLibraryNames(const std::string& lib, const std::list<std::string>& names);
