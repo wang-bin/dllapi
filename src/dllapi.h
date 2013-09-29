@@ -76,14 +76,14 @@ Q_EXPORT std::list<std::string> getLibraryNames(const std::string& lib);
  * , defined in OpenAL.cpp. Search in this id first. If found, use it. Otherwise go back to normal dll search by dllname
  *
  */
-Q_EXPORT bool testLoad(const char* dllname);
+DLLAPI_EXPORT bool testLoad(const char* dllname);
 /*
  * insert (std::string dllname, dllptr) to a map
  * they are used in xxx.cpp xxx.ctor/dtor for the most time
  * usually you don't need to call them
  */
-Q_EXPORT bool load(const char* dllname);
-Q_EXPORT bool unload(const char* dllname);
+DLLAPI_EXPORT bool load(const char* dllname);
+DLLAPI_EXPORT bool unload(const char* dllname);
 
 } //namespace DllAPI
 

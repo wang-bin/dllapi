@@ -58,7 +58,7 @@ namespace DllAPI {
  * this file is only used in xxx.cpp, e.g. dllapi/CL/cl.cpp
  * and dllapi/CL/cl.h is clean, only CL/cl.h content and DllAPI::OpenCL namespace
  */
-Q_EXPORT QLibrary* library(const char* dllname); //TODO: return pair? it's already private
+DLLAPI_EXPORT QLibrary* library(const char* dllname); //TODO: return pair? it's already private
 
 /********************************** The following code is only used in .cpp **************************************************/
 //e.g. DEFINE_DLLAPI_SYM_ARG(3, cl_int, clGetPlatformIDs, cl_uint, cl_platform_id*, cl_uint*)

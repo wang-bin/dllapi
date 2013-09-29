@@ -150,12 +150,12 @@ static const char* const dllapi_version_string = DLLAPI_VERSION_STR_LONG;
 
 
 #if defined(Q_DLL_LIBRARY)
-#  undef Q_EXPORT
-#  define Q_EXPORT Q_DECL_EXPORT
+#  undef DLLAPI_EXPORT
+#  define DLLAPI_EXPORT Q_DECL_EXPORT
 #else
-#  undef Q_EXPORT
-#  define Q_EXPORT //Q_DECL_IMPORT //only for vc?
+#  undef DLLAPI_EXPORT
+#  define DLLAPI_EXPORT Q_DECL_IMPORT //only for vc?
 #endif
-#define DLLAPI_EXPORT
+
 #endif // DLLAPI_GLOBAL_H
 
