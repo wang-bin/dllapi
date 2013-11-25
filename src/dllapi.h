@@ -60,15 +60,15 @@
 
 namespace DllAPI {
 
-Q_EXPORT void setSearchDirs(const std::list<std::string>& paths);
-Q_EXPORT void addSearchDirs(const std::list<std::string>& paths);
-Q_EXPORT void removeSearchDirs(const std::list<std::string>& paths);
-Q_EXPORT std::list<std::string> getSearchDirs();
+DLLAPI_EXPORT void setSearchDirs(const std::list<std::string>& paths);
+DLLAPI_EXPORT void addSearchDirs(const std::list<std::string>& paths);
+DLLAPI_EXPORT void removeSearchDirs(const std::list<std::string>& paths);
+DLLAPI_EXPORT std::list<std::string> getSearchDirs();
 //e.g. setLibraryNames("GL", list<string>() << "GL" << "OpenGL" << "OpenGL32");
-Q_EXPORT void setLibraryNames(const std::string& lib, const std::list<std::string>& names);
-Q_EXPORT void addLibraryNames(const std::string& lib, const std::list<std::string>& names);
-Q_EXPORT void removeLibraryNames(const std::string& lib, const std::list<std::string>& names);
-Q_EXPORT std::list<std::string> getLibraryNames(const std::string& lib);
+DLLAPI_EXPORT void setLibraryNames(const std::string& lib, const std::list<std::string>& names);
+DLLAPI_EXPORT void addLibraryNames(const std::string& lib, const std::list<std::string>& names);
+DLLAPI_EXPORT void removeLibraryNames(const std::string& lib, const std::list<std::string>& names);
+DLLAPI_EXPORT std::list<std::string> getLibraryNames(const std::string& lib);
 
 /* use this to test whether the library can be loaded. It will try load if not loaded.
  *return true if already loaded or load success.
