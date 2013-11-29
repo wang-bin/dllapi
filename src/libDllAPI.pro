@@ -1,7 +1,6 @@
 TEMPLATE = lib
 
-QT += core 
-QT       -= gui
+QT       =
 CONFIG   += console
 CONFIG   -= app_bundle
 
@@ -12,10 +11,11 @@ PROJECTROOT = $$PWD/..
 !include(libDllAPI.pri): error(could not find libDllAPI.pri)
 preparePaths($$OUT_PWD/../out)
 
-#src
-unix: SOURCES += 
-else:win32: SOURCES += 
+win32 {
 
+} else {
+    QMAKE_LFLAGS += -ldl
+}
 SOURCES += dllapi.cpp
 
 HEADERS += dllapi_global.h dllapi.h \

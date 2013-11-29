@@ -30,7 +30,19 @@
 #include <functional>
 #include <map>
 #include <string>
-#include <QtCore/QLibrary>
+
+#if defined(Q_OS_WIN)
+const std::string kDllPrefix = "";
+const std::string kDllSuffix = ".dll";
+#elif defined(Q_OS_MAC)
+#include <dlfcn.h>
+const std::string kDllPrefix = "lib";
+const std::string kDllSuffix = ".dylib";
+#else
+#include <dlfcn.h>
+const std::string kDllPrefix = "lib";
+const std::string kDllSuffix = ".so";
+#endif
 
 /*TODO:
  *
@@ -39,6 +51,91 @@
  */
 
 namespace DllAPI {
+
+void DllObject::setFileName(const std::string &name)
+{
+    file = name;
+    if (name.size() < kDllSuffix.size()) {
+        file += kDllSuffix;
+        return;
+    }
+    if (name.substr(name.size() - kDllSuffix.size()) != kDllSuffix) {
+        file += kDllSuffix;
+        return;
+    }
+}
+
+bool DllObject::load()
+{
+#ifdef Q_OS_WIN
+    return _load(false);
+#else
+    return _load(true);
+#endif
+}
+
+bool DllObject::_load(bool tryprefix)
+{
+#if defined(Q_OS_WIN)
+
+#else
+    handle = dlopen(file.c_str(), RTLD_NOW|RTLD_LOCAL);
+    if (!handle) {
+        error = dlerror();
+        if (file.substr(0, kDllPrefix.size()) != kDllPrefix) {
+            file = kDllPrefix + file;
+            return _load(false);
+        }
+    } else {
+        error.clear();
+    }
+#endif
+    return !!handle;
+}
+
+bool DllObject::unload()
+{
+#if defined(Q_OS_WIN)
+
+#else
+    if (handle) {
+        int err = dlclose(handle);
+        if (err != 0) {
+            error = dlerror();
+        } else {
+            error.clear();
+            handle = 0;
+        }
+    }
+#endif
+    return !handle;
+}
+
+void* DllObject::resolve(const std::string &symb)
+{
+    return _reslove(symb, true);
+}
+
+void* DllObject::_reslove(const std::string &symb, bool again)
+{
+    void *symbol = 0;
+#if defined(Q_OS_WIN)
+
+#else
+    symbol = dlsym(handle, symb.c_str());
+    if (!symbol && again) {
+        return _reslove("_" + symb, false);
+    }
+    if (!symbol) {
+        error = dlerror();
+    } else {
+        error.clear();
+    }
+#endif
+    return symbol;
+}
+
+
 static std::list<std::string> sLibDirs;
 
 void setSearchPaths(const std::list<std::string>& paths)
@@ -111,7 +208,7 @@ bool testLoad(const char *dllname)
 }
 
 
-typedef std::map<std::string, QLibrary*> dllmap_t;
+typedef std::map<std::string, DllObject*> dllmap_t;
 static dllmap_t sDllMap;
 
 bool load(const char* dllname)
@@ -124,19 +221,20 @@ bool load(const char* dllname)
     if (libnames.empty())
         libnames.push_back(dllname);
     std::list<std::string>::const_iterator it;
-    QLibrary *dll = new QLibrary();
+    DllObject *dll = new DllObject();
     for (it = libnames.begin(); it != libnames.end(); ++it) {
         dll->setFileName((*it).c_str());
+        // TODO: search paths
         if (dll->load())
             break;
-        DBG("%s\n", dll->errorString().toLocal8Bit().constData()); //why qDebug use toUtf8() and printf use toLocal8Bit()?
+        DBG("%s\n", dll->errorString().c_str()); //why qDebug use toUtf8() and printf use toLocal8Bit()?
     }
     if (it == libnames.end()) {
         DBG("No dll loaded\n");
         delete dll;
         return false;
     }
-    DBG("'%s' is loaded~~~\n", dll->fileName().toUtf8().constData());
+    DBG("'%s' is loaded~~~\n", dll->fileName().c_str());
     sDllMap[dllname] = dll; //map.insert will not replace the old one
     return true;
 }
@@ -150,13 +248,13 @@ public:
 
 bool unload(const char* dllname)
 {
-    QLibrary *dll = library(dllname);
+    DllObject *dll = library(dllname);
     if (!dll) {
         DBG("'%s' is not loaded\n", dllname);
         return true;
     }
     if (!dll->unload()) {
-        DBG("%s", dll->errorString().toUtf8().constData());
+        DBG("%s", dll->errorString().c_str());
         return false;
     }
     sDllMap.erase(std::find_if(sDllMap.begin(), sDllMap.end(), std::bind2nd(map_value_equal<dllmap_t>(), dll))->first);
@@ -164,7 +262,7 @@ bool unload(const char* dllname)
     return true;
 }
 
-QLibrary* library(const char *dllname)
+DllObject* library(const char *dllname)
 {
     dllmap_t::iterator it = sDllMap.find(dllname);
     if (it == sDllMap.end())

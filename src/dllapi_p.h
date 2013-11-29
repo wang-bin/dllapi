@@ -18,7 +18,7 @@
 
 #include "dllapi_global.h"
 #include <stdio.h>
-
+#include <string>
 
 #if defined(_MSC_VER)
 #pragma warning(disable:4098) //vc return void
@@ -48,9 +48,31 @@
 #   endif
 #endif
 
-#include <QtCore/QLibrary>
-
 namespace DllAPI {
+
+
+class DLLAPI_EXPORT DllObject {
+public:
+    DllObject(const std::string& name = "")
+        : loaded(false)
+    {
+    }
+    ~DllObject() { unload(); }
+    std::string errorString() const { return error;}
+    std::string fileName() const { return file;}
+    void setFileName(const std::string& name);
+    bool isLoaded() const { return loaded; }
+    bool load();
+    bool unload();
+    void* resolve(const std::string& symb);
+private:
+    bool _load(bool tryprefix);
+    void* _reslove(const std::string& symb, bool again = false);
+    bool loaded;
+    void *handle;
+    std::string file;
+    std::string error;
+};
 
 /*
  *TODO: move load, unload, sDllMap, to dllapi_p.h(also map), keep this file empty?
@@ -58,7 +80,7 @@ namespace DllAPI {
  * this file is only used in xxx.cpp, e.g. dllapi/CL/cl.cpp
  * and dllapi/CL/cl.h is clean, only CL/cl.h content and DllAPI::OpenCL namespace
  */
-DLLAPI_EXPORT QLibrary* library(const char* dllname); //TODO: return pair? it's already private
+DLLAPI_EXPORT DllObject* library(const char* dllname); //TODO: return pair? it's already private
 
 /********************************** The following code is only used in .cpp **************************************************/
 //e.g. DEFINE_DLLAPI_SYM_ARG(3, cl_int, clGetPlatformIDs, cl_uint, cl_platform_id*, cl_uint*)

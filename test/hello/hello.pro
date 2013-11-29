@@ -1,4 +1,4 @@
-QT = core
+QT =
 TEMPLATE = app
 TARGET = hello
 STATICLINK = 0
