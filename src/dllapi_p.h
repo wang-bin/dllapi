@@ -56,6 +56,8 @@ public:
     DllObject(const std::string& name = "")
         : loaded(false)
     {
+        if (!name.empty())
+            setFileName(name);
     }
     ~DllObject() { unload(); }
     std::string errorString() const { return error;}
