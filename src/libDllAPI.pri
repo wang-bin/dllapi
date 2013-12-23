@@ -141,6 +141,8 @@ QMAKE_LFLAGS_RPATH += #will append to rpath dir
 	}
 }
 
+unix: LIBS += -ldl
+
 unset(LIB_VERSION)
 unset(PROJECT_SRCPATH)
 unset(PROJECT_LIBDIR)

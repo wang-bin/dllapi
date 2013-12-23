@@ -23,6 +23,9 @@
 #ifndef _SDL_config_h
 #define _SDL_config_h
 
+#include <stdint.h>
+#include <stddef.h>
+#include <stdarg.h>
 #include "SDL_platform.h"
 
 /* Add any platform that doesn't build using the configure system */
@@ -39,7 +42,7 @@
 #elif defined(__OS2__)
 #include "SDL_config_os2.h"
 #else
-#include "SDL_config_minimal.h"
+//#include "SDL_config_minimal.h"
 #endif /* platform config */
 
 #endif /* _SDL_config_h */
