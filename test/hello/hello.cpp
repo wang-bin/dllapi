@@ -3,7 +3,7 @@
 #include <string>
 #include <iostream>
 
-using namespace DllObjectmespace DllAPI {
+namespace DllAPI {
 namespace test {
 DEFINE_DLL_INSTANCE("hello")
 DEFINE_DLLAPI_ARG(1, void*, hello, int)

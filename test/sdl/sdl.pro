@@ -1,5 +1,6 @@
 QT =
 TEMPLATE = app
+CONFIG += console
 TARGET = sdl
 STATICLINK = 0
 PROJECTROOT = $$PWD/../..

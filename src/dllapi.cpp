@@ -32,6 +32,35 @@
 #include <string>
 
 #if defined(Q_OS_WIN)
+#include <windows.h>
+
+#include "ts_string.h"
+
+/* Routines to convert from UTF8 to native Windows text */
+#if UNICODE
+#define WIN_StringToUTF8(S) ts_strdup_unicode_to_ascii(S)
+#define WIN_UTF8ToString(S) (WCHAR *)ts_strdup_ascii_to_unicode(S)
+#else
+#error Not Implemented
+#endif
+static inline std::string GetLastErrorString(DWORD nErrorCode)
+{
+    WCHAR* msg = 0; //Qt: wchar_t
+    // Ask Windows to prepare a standard message for a GetLastError() code:
+    FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                  NULL,
+                  nErrorCode,
+                  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                  (LPTSTR)&msg,
+                  0,
+                  NULL);
+    char *amsg = ts_strdup_unicode_to_ascii(msg);
+    std::string s(amsg);
+    free(amsg);
+    LocalFree(msg);
+    return s;
+}
+
 const std::string kDllPrefix = "";
 const std::string kDllSuffix = ".dll";
 #elif defined(Q_OS_MAC)
@@ -77,26 +106,44 @@ bool DllObject::load()
 bool DllObject::_load(bool tryprefix)
 {
 #if defined(Q_OS_WIN)
-
+    LPTSTR tstr = ts_strdup_ascii_to_unicode(file.c_str());
+    handle = (void *)LoadLibrary(tstr);
+    free(tstr);
+    if (!handle) {
+        error = GetLastErrorString(GetLastError());
+    }
 #else
     handle = dlopen(file.c_str(), RTLD_NOW|RTLD_LOCAL);
-    if (!handle) {
+    if (!handle)
         error = dlerror();
-        if (file.substr(0, kDllPrefix.size()) != kDllPrefix) {
-            file = kDllPrefix + file;
-            return _load(false);
+#endif
+    if (!handle) {
+        if (!tryprefix || kDllPrefix.empty() || file.substr(0, kDllPrefix.size()) == kDllPrefix) {
+            DBG("failed to load %s: %s\n", file.c_str(), error.c_str());
+            return false;
         }
+        file = kDllPrefix + file;
+        return _load(false);
     } else {
         error.clear();
     }
-#endif
+    DBG("dll name: %s, handle: %p\n", file.c_str(), handle);
     return !!handle;
 }
 
 bool DllObject::unload()
 {
 #if defined(Q_OS_WIN)
-
+    if (handle != NULL) {
+        FreeLibrary((HMODULE)handle);
+    }
+    DWORD err = GetLastError();
+    if (err == 0) {
+        error.clear();
+        handle = 0;
+    } else {
+        error = GetLastErrorString(err);
+    }
 #else
     if (handle) {
         int err = dlclose(handle);
@@ -120,18 +167,22 @@ void* DllObject::_reslove(const std::string &symb, bool again)
 {
     void *symbol = 0;
 #if defined(Q_OS_WIN)
-
+    symbol = (void *)GetProcAddress((HMODULE)handle, symb.c_str());
+    if (!symbol) {
+        error = GetLastErrorString(GetLastError());
+        DBG("FAILED to resolve %s from handle %p\n", symb.c_str(), handle);
+    }
 #else
     symbol = dlsym(handle, symb.c_str());
+    if (!symbol)
+        error = dlerror();
+#endif
     if (!symbol && again) {
         return _reslove("_" + symb, false);
     }
-    if (!symbol) {
-        error = dlerror();
-    } else {
+    if (symbol) {
         error.clear();
     }
-#endif
     return symbol;
 }
 
@@ -254,7 +305,7 @@ bool unload(const char* dllname)
         return true;
     }
     if (!dll->unload()) {
-        DBG("%s", dll->errorString().c_str());
+        DBG("%s\n", dll->errorString().c_str());
         return false;
     }
     sDllMap.erase(std::find_if(sDllMap.begin(), sDllMap.end(), std::bind2nd(map_value_equal<dllmap_t>(), dll))->first);

@@ -11,15 +11,17 @@ PROJECTROOT = $$PWD/..
 !include(libDllAPI.pri): error(could not find libDllAPI.pri)
 preparePaths($$OUT_PWD/../out)
 
-win32 {
-
-} else {
-    QMAKE_LFLAGS += -ldl
-}
 SOURCES += dllapi.cpp
 
 HEADERS += dllapi_global.h dllapi.h \
     dllapi_p.h
 
+
+win32 {
+HEADERS += ts_string.h
+SOURCES += ts_string.cpp
+} else {
+    QMAKE_LFLAGS += -ldl
+}
 
 
