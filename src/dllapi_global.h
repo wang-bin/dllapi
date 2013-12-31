@@ -120,6 +120,14 @@ static const char* const dllapi_version_string = DLLAPI_VERSION_STR_LONG;
 #  define Q_CC_NOKIAX86
 #endif
 
+#ifdef __GNUC__
+#  define Q_LIKELY(expr)    __builtin_expect(!!(expr), 1)
+#  define Q_UNLIKELY(expr)  __builtin_expect(!!(expr), 0)
+#else
+#  define Q_LIKELY(x) (x)
+#  define Q_UNLIKELY(x) (x)
+#endif
+
 #if defined(Q_OS_LINUX) && defined(Q_CC_RVCT)
 #  define Q_DECL_EXPORT     __attribute__((visibility("default")))
 #  define Q_DECL_IMPORT     __attribute__((visibility("default")))

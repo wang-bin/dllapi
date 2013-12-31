@@ -156,11 +156,10 @@ struct Default<void*> {
     R name ARG_T_V { \
         typedef R (*api_t) ARG_T; \
         static api_t api = (api_t)dll::instance().resolve(sym); \
-        if (!api) { \
-            fprintf(stderr, "resolve symbol '%s' failed!\n", sym); \
-            if (!IsVoid<R>::value) return (R)Default<R>::value; \
-        } \
-        return api ARG_V; \
+        if (Q_LIKELY(api)) \
+            return api ARG_V; \
+        fprintf(stderr, "resolve symbol '%s' failed!\n", sym); \
+        if (!IsVoid<R>::value) return (R)Default<R>::value; \
     }
 
 //TODO: add multiple dll names support. e.g. in unix it's OpenGL, in windows is OpenGL32
