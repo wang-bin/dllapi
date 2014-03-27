@@ -17,6 +17,7 @@
  */
 
 #include "dllapi_global.h"
+#include <assert.h>
 #include <stdio.h>
 #include <string>
 
@@ -96,7 +97,9 @@ DLLAPI_EXPORT DllObject* library(const char* dllname); //TODO: return pair? it's
  * The symbol of the api is "name". Otherwise, use DEFINE_DLLAPI_SYM_ARGN instead.
  */
 #define DEFINE_DLLAPI_ARG(N, R, name, ...) \
-    EXPAND(DEFINE_DLLAPI_SYM_ARG##N(R, name, #name, __VA_ARGS__))
+    EXPAND(DEFINE_DLLAPI_SYM_ARG##N(R, name, name, __VA_ARGS__))
+//EXPAND(DEFINE_DLLAPI_SYM_ARG##N(R, name, #name, __VA_ARGS__))
+
 /*!
  * used by .cpp to define the api
  *  e.g. DEFINE_DLLAPI_SYM_ARG3(cl_int, clGetPlatformIDs, "clGetPlatformIDs", cl_uint, cl_platform_id*, cl_uint*)
@@ -155,10 +158,12 @@ struct Default<void*> {
 #define DEFINE_DLLAPI_SYM_ARG_T_V(R, name, sym, ARG_T, ARG_T_V, ARG_V) \
     R name ARG_T_V { \
         typedef R (*api_t) ARG_T; \
-        static api_t api = (api_t)dll::instance().resolve(sym); \
+        static api_t api = (api_t)dll::instance().resolve(#sym); \
         if (Q_LIKELY(api)) \
             return api ARG_V; \
-        fprintf(stderr, "resolve symbol '%s' failed!\n", sym); \
+        fprintf(stderr, "resolve symbol '%s' failed!\n", #sym); \
+        static int failed_to_resolve_symbol_##sym = 0; \
+        assert(failed_to_resolve_symbol_##sym); \
         if (!IsVoid<R>::value) return (R)Default<R>::value; \
     }
 
