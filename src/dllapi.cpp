@@ -89,10 +89,17 @@ void DllObject::setFileName(const std::string &name)
         file += kDllSuffix;
         return;
     }
-    //TODO:  xx.so.2. use strstr
-    if (name.substr(name.size() - kDllSuffix.size()) != kDllSuffix) {
+    size_t suf_pos = name.rfind(kDllSuffix); //find the last: xxx.soyz.so.1
+    if (suf_pos == std::string::npos) {
         file += kDllSuffix;
         return;
+    }
+    // xx.sox, xx.so.1
+    if (suf_pos + kDllSuffix.size() > name.size()) {
+        if (name.substr(suf_pos + kDllSuffix.size(), 1) != ".") {
+            file += kDllSuffix;
+            return;
+        }
     }
 }
 
