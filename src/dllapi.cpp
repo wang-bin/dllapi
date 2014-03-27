@@ -30,6 +30,7 @@
 #include <functional>
 #include <map>
 #include <string>
+#include <cassert>
 
 #if defined(Q_OS_WIN)
 #include <windows.h>
@@ -187,16 +188,56 @@ void* DllObject::_reslove(const std::string &symb, bool again)
 }
 
 
-static std::list<std::string> sLibDirs;
+static std::vector<std::string> sLibDirs;
 
-void setSearchPaths(const std::list<std::string>& paths)
+typedef std::map<std::string, std::vector<std::string> > lib_names_map_t;
+static lib_names_map_t sLibNamesMap;
+
+#if 0
+void dllapiGetStrings(int pname, char **strings)
+{
+
+}
+
+void dllapiSetStrings(int pname, const char **strings)
+{
+    assert(!strings || !strings[0]);
+    std::string key(strings[0]);
+    std::vector<std::string> new_value;
+    for (int i = 1; strings[i]; ++i) {
+        new_value.push_back(strings[i]);
+    }
+    if (pname == DLL_DIRS) {
+
+    } else if (pname == DLL_NAMES) {
+        sLibNamesMap[lib] = names;
+    }
+}
+
+void dllapiGetStrings(int pname, char **strings)
+{
+    assert(!strings || !strings[0]);
+    std::string key(strings[0]);
+    std::vector<std::string> new_value;
+    for (int i = 1; strings[i]; ++i) {
+        new_value.push_back(strings[i]);
+    }
+    if (pname == DLL_DIRS) {
+
+    } else if (pname == DLL_NAMES) {
+        sLibNamesMap[lib] = names;
+    }
+}
+#endif
+
+void setSearchPaths(const std::vector<std::string>& paths)
 {
     sLibDirs = paths;
 }
 
-void addSearchPaths(const std::list<std::string>& paths)
+void addSearchPaths(const std::vector<std::string>& paths)
 {
-    for (std::list<std::string>::const_iterator it = paths.begin();
+    for (std::vector<std::string>::const_iterator it = paths.begin();
          it != paths.end(); ++it) {
         if (std::find(sLibDirs.begin(), sLibDirs.end(), *it) == sLibDirs.end()) {
             sLibDirs.push_back(*it);
@@ -204,32 +245,26 @@ void addSearchPaths(const std::list<std::string>& paths)
     }
 }
 
-void removeSearchPaths(const std::list<std::string> &paths)
+void removeSearchPaths(const std::vector<std::string> &paths)
 {
-    for (std::list<std::string>::const_iterator it = paths.begin();
+    for (std::vector<std::string>::const_iterator it = paths.begin();
          it != paths.end(); ++it) {
         std::remove_if(sLibDirs.begin(), sLibDirs.end(), std::bind2nd(std::equal_to<std::string>(), *it));
     }
 }
 
-std::list<std::string> getSearchPaths()
+std::vector<std::string> getSearchPaths()
 {
     return sLibDirs;
 }
 
-typedef std::map<std::string, std::list<std::string> > lib_names_map_t;
-static lib_names_map_t sLibNamesMap;
-void setLibraryNames(const std::string& lib, const std::list<std::string>& names)
-{
-    sLibNamesMap[lib] = names;
-}
 
-void addLibraryNames(const std::string& lib, const std::list<std::string>& names)
+void addLibraryNames(const std::string& lib, const std::vector<std::string>& names)
 {
-    std::list<std::string> &libnames = sLibNamesMap[lib];
+    std::vector<std::string> &libnames = sLibNamesMap[lib];
     if (libnames.empty())
         libnames.push_back(lib);
-    for (std::list<std::string>::const_iterator it = names.begin();
+    for (std::vector<std::string>::const_iterator it = names.begin();
          it != names.end(); ++it) {
         if (std::find(libnames.begin(), libnames.end(), *it) == libnames.end()) {
             libnames.push_back(*it);
@@ -237,16 +272,16 @@ void addLibraryNames(const std::string& lib, const std::list<std::string>& names
     }
 }
 
-void removeLibraryNames(const std::string& lib, const std::list<std::string>& names)
+void removeLibraryNames(const std::string& lib, const std::vector<std::string>& names)
 {
-    std::list<std::string> &libnames = sLibNamesMap[lib];
-    for (std::list<std::string>::const_iterator it = names.begin();
+    std::vector<std::string> &libnames = sLibNamesMap[lib];
+    for (std::vector<std::string>::const_iterator it = names.begin();
          it != names.end(); ++it) {
         std::remove_if(libnames.begin(), libnames.end(), std::bind2nd(std::equal_to<std::string>(), *it));
     }
 }
 
-std::list<std::string> getLibraryNames(const std::string& lib)
+std::vector<std::string> getLibraryNames(const std::string& lib)
 {
     return sLibNamesMap[lib];
 }
@@ -268,10 +303,10 @@ bool load(const char* dllname)
         DBG("'%s' is already loaded\n", dllname);
         return true;
     }
-    std::list<std::string> libnames = sLibNamesMap[dllname];
+    std::vector<std::string> libnames = sLibNamesMap[dllname];
     if (libnames.empty())
         libnames.push_back(dllname);
-    std::list<std::string>::const_iterator it;
+    std::vector<std::string>::const_iterator it;
     DllObject *dll = new DllObject();
     for (it = libnames.begin(); it != libnames.end(); ++it) {
         dll->setFileName((*it).c_str());

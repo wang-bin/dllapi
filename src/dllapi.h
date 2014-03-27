@@ -55,20 +55,25 @@
    to enable dynamically loading api instead of linked api. of cause, you should not link to that lib from then on.
 */
 #include "dllapi_global.h"
-#include <list>
+#include <vector>
 #include <string>
 
 namespace DllAPI {
 
-DLLAPI_EXPORT void setSearchDirs(const std::list<std::string>& paths);
-DLLAPI_EXPORT void addSearchDirs(const std::list<std::string>& paths);
-DLLAPI_EXPORT void removeSearchDirs(const std::list<std::string>& paths);
-DLLAPI_EXPORT std::list<std::string> getSearchDirs();
-//e.g. setLibraryNames("GL", list<string>() << "GL" << "OpenGL" << "OpenGL32");
-DLLAPI_EXPORT void setLibraryNames(const std::string& lib, const std::list<std::string>& names);
-DLLAPI_EXPORT void addLibraryNames(const std::string& lib, const std::list<std::string>& names);
-DLLAPI_EXPORT void removeLibraryNames(const std::string& lib, const std::list<std::string>& names);
-DLLAPI_EXPORT std::list<std::string> getLibraryNames(const std::string& lib);
+#define DLL_DIRS 0
+#define DLL_NAMES 1
+
+/*
+ * strings: ends with NULL.
+ */
+DLLAPI_EXPORT void dllapiSetStrings(int pname, const char** strings);
+// strings: first is dll name, rest are optional names
+DLLAPI_EXPORT void dllapiGetStrings(int pname, char** strings);
+
+DLLAPI_EXPORT void setLibraryNames(const std::string& lib, const std::vector<std::string>& names);
+DLLAPI_EXPORT void addLibraryNames(const std::string& lib, const std::vector<std::string>& names);
+DLLAPI_EXPORT void removeLibraryNames(const std::string& lib, const std::vector<std::string>& names);
+DLLAPI_EXPORT std::vector<std::string> getLibraryNames(const std::string& lib);
 
 /* use this to test whether the library can be loaded. It will try load if not loaded.
  *return true if already loaded or load success.
