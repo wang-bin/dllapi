@@ -171,7 +171,58 @@ struct Default<void*> {
  * 	, "OpenAL32"
  * #else if ...
  */
-#define DEFINE_DLL_INSTANCE_N(dllid, ...) //vaarg
+/*!
+ * \brief addLibraryNames
+ * \param lib
+ *  add a list of dll names for \a lib. must end with NULL!
+ */
+void addLibraryNames(const std::string& lib, ...);
+void addLibraryNames(const std::string &lib, char** cnames);
+#define DEFINE_DLL_INSTANCE_N(dllid, ...) \
+    class dll { \
+    public: \
+        static dll& instance() { \
+            static dll d; \
+            return d; \
+        } \
+        void* resolve(const char* sym) { \
+            DBG("%s (symbol: %s)\n", DLLAPI_FUNC, sym); \
+            if (!mLoaded) \
+                return 0; \
+            return (void*)DllAPI::library(dllid)->resolve(sym); \
+        } \
+    private: \
+        dll() { \
+            addLibraryNames(dllid, ##__VA_ARGS__); \
+            mLoaded = testLoad(dllid); \
+        } \
+        ~dll() { unload(dllid); } \
+        bool mLoaded; \
+    };
+
+// compiler may not support init list {a, b, c}
+#define DEFINE_DLL_INSTANCE_V(dllid, names) \
+    class dll { \
+    public: \
+        static dll& instance() { \
+            static dll d; \
+            return d; \
+        } \
+        void* resolve(const char* sym) { \
+            DBG("%s (symbol: %s)\n", DLLAPI_FUNC, sym); \
+            if (!mLoaded) \
+                return 0; \
+            return (void*)DllAPI::library(dllid)->resolve(sym); \
+        } \
+    private: \
+        dll() { \
+            addLibraryNames(dllid, names); \
+            mLoaded = testLoad(dllid); \
+        } \
+        ~dll() { unload(dllid); } \
+        bool mLoaded; \
+    };
+
 #define DEFINE_DLL_INSTANCE(dllname) \
     class dll { \
     public: \

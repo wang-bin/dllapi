@@ -26,6 +26,7 @@
 
 #include "dllapi.h"
 #include "dllapi_p.h"
+#include <stdarg.h>
 #include <algorithm>
 #include <functional>
 #include <map>
@@ -88,6 +89,7 @@ void DllObject::setFileName(const std::string &name)
         file += kDllSuffix;
         return;
     }
+    //TODO:  xx.so.2. use strstr
     if (name.substr(name.size() - kDllSuffix.size()) != kDllSuffix) {
         file += kDllSuffix;
         return;
@@ -222,6 +224,29 @@ static lib_names_map_t sLibNamesMap;
 void setLibraryNames(const std::string& lib, const std::list<std::string>& names)
 {
     sLibNamesMap[lib] = names;
+}
+
+void addLibraryNames(const std::string& lib, ...)
+{
+    std::list<std::string> names;
+    va_list vl;
+    va_start(vl, lib); //start from 'lib'
+    char* str = va_arg(vl, char*);
+    while (str) {
+        names.push_back(str);
+        str = va_arg(vl,char*);
+    }
+    va_end(vl);
+    addLibraryNames(lib, names);
+}
+
+void addLibraryNames(const std::string &lib, char** cnames)
+{
+    std::list<std::string> names;
+    for (int i = 0; cnames[i]; ++i) {
+        names.push_back(cnames[i]);
+    }
+    addLibraryNames(lib, names);
 }
 
 void addLibraryNames(const std::string& lib, const std::list<std::string>& names)

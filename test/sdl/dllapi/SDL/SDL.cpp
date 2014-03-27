@@ -5,17 +5,7 @@
 namespace DllAPI {
 namespace SDL {
 
-namespace {
-struct dll_name_init {
-    dll_name_init() {
-        std::list<std::string> names;
-        names.push_back("SDL32");
-        addLibraryNames("SDL", names);
-    }
-} init;
-}
-
-DEFINE_DLL_INSTANCE("SDL")
+DEFINE_DLL_INSTANCE_N("sdl", "SDL", "SDL32", "SDL-1.2", NULL)
 DEFINE_DLLAPI_ARG(1, int, SDL_Init, Uint32)
 DEFINE_DLLAPI_ARG(2, void, SDL_WM_SetCaption, const char*, const char*)
 DEFINE_DLLAPI_ARG(1, int, SDL_PollEvent, SDL_Event*)
