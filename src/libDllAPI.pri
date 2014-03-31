@@ -42,15 +42,15 @@
 #
 
 NAME = DllAPI
+eval($${NAME}_STATICLINK = 1)
 !isEmpty(LIB$$upper($$NAME)_PRI_INCLUDED): {
-	error("lib$${NAME}.pri already included")
-	unset(NAME)
+        error("lib$${NAME}.pri already included")
+        unset(NAME)
 }
-#!isEmpty(LIBDLLAPI_PRI_INCLUDED):error("libDllAPI.pri already included")
 eval(LIB$$upper($$NAME)_PRI_INCLUDED = 1)
 
-LIB_VERSION = 1.0.0 #0.x.y may be wrong for dll
-isEmpty(STATICLINK): STATICLINK = 0  #1 or 0. use static lib or not
+LIB_VERSION = 1.3.2 #0.x.y may be wrong for dll
+isEmpty($${NAME}_STATICLINK): eval($${NAME}_STATICLINK = 0) #1 or 0. use static lib or not
 
 TEMPLATE += fakelib
 PROJECT_TARGETNAME = $$qtLibraryTarget($$NAME)
@@ -63,85 +63,94 @@ CONFIG += depend_includepath #?
 
 PROJECT_SRCPATH = $$PWD
 PROJECT_LIBDIR = $$qtLongName($$BUILD_DIR/lib)
-
 #for system include path
 *msvc* {
 } else {
-    QMAKE_CXXFLAGS += -isystem $$PROJECT_SRCPATH/..
+    QMAKE_CXXFLAGS += -isystem $$PROJECT_SRCPATH -isystem $$PROJECT_SRCPATH/..
 }
-INCLUDEPATH *= $$PROJECT_SRCPATH
+INCLUDEPATH *= $$PROJECT_SRCPATH $$PROJECT_SRCPATH/.. $$PROJECT_SRCPATH/$$NAME
 DEPENDPATH *= $$PROJECT_SRCPATH
-QMAKE_LFLAGS_RPATH += #will append to rpath dir
+#QMAKE_LFLAGS_RPATH += #will append to rpath dir
 
 #eval() ?
-#!dllapi-buildlib {
 !contains(CONFIG, $$lower($$NAME)-buildlib) {
-	#The following may not need to change
-	CONFIG *= link_prl
-	LIBS *= -L$$PROJECT_LIBDIR -l$$qtLibName($$NAME)
-	isEqual(STATICLINK, 1) {
+    #The following may not need to change
+    CONFIG *= link_prl
+    LIBS *= -L$$PROJECT_LIBDIR -l$$qtLibName($$NAME)
+        isEqual($${NAME}_STATICLINK, 1) {
                 PRE_TARGETDEPS += $$PROJECT_LIBDIR/$$qtStaticLib($$NAME)
-	} else {
-		win32 {
-			PRE_TARGETDEPS *= $$PROJECT_LIBDIR/$$qtSharedLib($$NAME, $$LIB_VERSION)
-		} else {
+        } else {
+                win32 {
+                        PRE_TARGETDEPS *= $$PROJECT_LIBDIR/$$qtSharedLib($$NAME, $$LIB_VERSION)
+                } else {
                         PRE_TARGETDEPS *= $$PROJECT_LIBDIR/$$qtSharedLib($$NAME)
-# $$[QT_INSTALL_LIBS] and $$DESTDIR will be auto added to rpath
-# Current (sub)project dir is auto added to the first value as prefix. e.g. QMAKE_RPATHDIR = .. ==> -Wl,-rpath,ROOT/.. 
-# Executable dir search: ld -z origin, g++ -Wl,-R,'$ORIGIN', in makefile -Wl,-R,'$$ORIGIN'
-# Working dir search: "."
-# TODO: for macx. see qtcreator/src/rpath.pri. search exe dir first(use QMAKE_LFLAGS = '$$RPATH_FLAG' $$QMAKE_LFLAGS)
-			unix:!macx {
-				QMAKE_RPATHDIR *= $$PROJECT_LIBDIR:\'\$\$ORIGIN\':\'\$\$ORIGIN/lib\':.
-				QMAKE_LFLAGS *= -Wl,-z,origin
-			}
-		}
-	}
+
+                }
+        }
 } else {
-	#Add your additional configuration first. e.g.
+        #Add your additional configuration first. e.g.
+
 #	win32: LIBS += -lUser32
 # The following may not need to change
-
-	#TEMPLATE = lib
-	VERSION = $$LIB_VERSION
-	TARGET = $$PROJECT_TARGETNAME
-	DESTDIR= $$PROJECT_LIBDIR
-
+    !CONFIG(plugin) {
+        #TEMPLATE = lib
+        VERSION = $$LIB_VERSION
+        DESTDIR= $$PROJECT_LIBDIR
+    }
+        TARGET = $$PROJECT_TARGETNAME ##I commented out this before, why?
         CONFIG *= create_prl #
-	isEqual(STATICLINK, 1) {
-		CONFIG -= shared dll ##otherwise the following shared is true, why?
-		CONFIG *= staticlib
-	} else {
-		DEFINES += Q_DLL_LIBRARY #win32-msvc*
-		CONFIG *= shared #shared includes dll
-	}
+        isEqual($${NAME}_STATICLINK, 1) {
+                CONFIG -= shared dll ##otherwise the following shared is true, why?
+                CONFIG *= staticlib
+        } else {
+                DEFINES += BUILD_$$upper($$NAME)_LIB #win32-msvc*
+                CONFIG *= shared #shared includes dll
+        }
 
-	shared {
-		!isEqual(DESTDIR, $$BUILD_DIR/bin): DLLDESTDIR = $$BUILD_DIR/bin #copy shared lib there
-		CONFIG(release, debug|release): !isEmpty(QMAKE_STRIP): QMAKE_POST_LINK = -$$QMAKE_STRIP $$PROJECT_LIBDIR/$$qtSharedLib($$NAME)
-
-		#copy from the pro creator creates.
-		symbian {
-			MMP_RULES += EXPORTUNFROZEN
-			TARGET.UID3 = 0xE4CC8061
-			TARGET.CAPABILITY =
-			TARGET.EPOCALLOWDLLDATA = 1
-			addFiles.sources = $$qtSharedLib($$NAME, $$LIB_VERSION)
-			addFiles.path = !:/sys/bin
-			DEPLOYMENT += addFiles
-		}
-	}
-	unix:!symbian {
-		maemo5 {
-			target.path = /opt/usr/lib
-		} else {
-			target.path = /usr/lib
-		}
-		INSTALLS += target
-	}
+        shared {
+        !CONFIG(plugin) {
+            !isEqual(DESTDIR, $$BUILD_DIR/bin): DLLDESTDIR = $$BUILD_DIR/bin #copy shared lib there
+        }
+                CONFIG(release, debug|release): !isEmpty(QMAKE_STRIP): QMAKE_POST_LINK = -$$QMAKE_STRIP $$PROJECT_LIBDIR/$$qtSharedLib($$NAME)
+                #copy from the pro creator creates.
+                symbian {
+                        MMP_RULES += EXPORTUNFROZEN
+                        TARGET.UID3 = 0xE4CC8061
+                        TARGET.CAPABILITY =
+                        TARGET.EPOCALLOWDLLDATA = 1
+                        addFiles.sources = $$qtSharedLib($$NAME, $$LIB_VERSION)
+                        addFiles.path = !:/sys/bin
+                        DEPLOYMENT += addFiles
+                }
+        }
+        unix:!symbian {
+                maemo5 {
+                        target.path = /opt/usr/lib
+                } else {
+                        target.path = /usr/lib
+                }
+                INSTALLS += target
+        }
 }
 
-unix: LIBS += -ldl
+unix {
+    LIBS += -L/usr/local/lib
+# $$[QT_INSTALL_LIBS] and $$DESTDIR and pro dir will be auto added to QMAKE_RPATHDIR if QMAKE_RPATHDIR is not empty
+# Current (sub)project dir is auto added to the first value as prefix. e.g. QMAKE_RPATHDIR = .. ==> -Wl,-rpath,ROOT/..
+# Executable dir search: ld -z origin, g++ -Wl,-R,'$ORIGIN', in makefile -Wl,-R,'$$ORIGIN'
+# Working dir search: "."
+# TODO: for macx. see qtcreator/src/rpath.pri. (-rpath define rpath, @rpath exapand to that path?)
+    macx {
+        QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/Frameworks/
+        QMAKE_LFLAGS += -Wl,-rpath,@loader_path/../,-rpath,@executable_path/../
+    } else {
+        RPATHDIR = \$\$ORIGIN \$\$ORIGIN/lib . /usr/local/lib
+# $$PROJECT_LIBDIR only for host == target. But QMAKE_TARGET.arch is only available on windows. QT_ARCH is bad, e.g. QT_ARCH=i386 while QMAKE_HOST.arch=i686
+# https://bugreports.qt-project.org/browse/QTBUG-30263
+        isEmpty(CROSS_COMPILE): RPATHDIR *= $$PROJECT_LIBDIR
+        QMAKE_LFLAGS *= -Wl,-z,origin \'-Wl,-rpath,$$join(RPATHDIR, ":")\'
+    }
+}
 
 unset(LIB_VERSION)
 unset(PROJECT_SRCPATH)
