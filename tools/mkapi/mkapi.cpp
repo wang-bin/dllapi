@@ -129,7 +129,7 @@ private:
 int main(int argc, char *argv[])
 {
     if (argc != 2) {
-        llvm::errs() << "Usage: rewritersample <filename>\n";
+        llvm::errs() << "Usage: mkapi filename\n";
         return 1;
     }
 
@@ -169,7 +169,8 @@ int main(int argc, char *argv[])
 
     // Parse the file to AST, registering our consumer as the AST consumer.
     ParseAST(TheCompInst.getPreprocessor(), &TheConsumer,
-             TheCompInst.getASTContext());
+             TheCompInst.getASTContext()
+             , clang::TU_Complete);
 
     // At this point the rewriter's buffer should be full with the rewritten
     // file contents.
@@ -187,7 +188,7 @@ int main(int argc, char *argv[])
         for (int i = 0; i < params.size(); ++i) {
             cout << ", " << params[i];
         }
-        cout << ");" << endl;
+        cout << ")" << endl;
     }
     
     cout << stream.str() << endl;
