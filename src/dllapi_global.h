@@ -1,5 +1,5 @@
 /******************************************************************************
-    DllAPI: call c api by dynamically loading it's library
+    dllapi: call c api by dynamically loading it's library
     Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 
     This library is free software; you can redistribute it and/or

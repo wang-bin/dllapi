@@ -1,5 +1,5 @@
 /******************************************************************************
-    DllAPI: call c api by dynamically loading it's library
+    dllapi: call c api by dynamically loading it's library
     Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 
     This library is free software; you can redistribute it and/or
@@ -28,9 +28,9 @@
 #define DLLAPI_H
 
 /*!
- * put "someprefix/somelib.h" and all required content in namespace DllAPI, in file "dllapi/someprefix/somelib.h"
+ * put "someprefix/somelib.h" and all required content in namespace dllapi, in file "dllapi/someprefix/somelib.h"
  * e.g.
-   namespace DllAPI {
+   namespace dllapi {
    namespace SomeLib {
    extern CL_API_ENTRY cl_int CL_API_CALL
    clGetPlatformIDs(cl_uint  num_entries,
@@ -42,7 +42,7 @@
    in "dllapi/someprefix/somelib.cpp":
    #include "dllapi.h"
    #include "dllapi_p.h"
-   namespace DllAPI {
+   namespace dllapi {
    namespace SomeLib {
     DEFINE_DLL_INSTANCE(libname)
     e.g. DEFINE_DLLAPI_ARG(3, cl_int, clGetPlatformIDs, cl_uint, cl_platform_id, cl_uint);
@@ -51,14 +51,14 @@
 
    then in your app source, just add:
    #include "dllapi/someprefix/somelib.h"
-   using namespace DllAPI::SomeLib;
+   using namespace dllapi::SomeLib;
    to enable dynamically loading api instead of linked api. of cause, you should not link to that lib from then on.
 */
 #include "dllapi_global.h"
 #include <list>
 #include <string>
 
-namespace DllAPI {
+namespace dllapi {
 
 DLLAPI_EXPORT void setSearchDirs(const std::list<std::string>& paths);
 DLLAPI_EXPORT void addSearchDirs(const std::list<std::string>& paths);
@@ -85,7 +85,7 @@ DLLAPI_EXPORT bool testLoad(const char* dllname);
 DLLAPI_EXPORT bool load(const char* dllname);
 DLLAPI_EXPORT bool unload(const char* dllname);
 
-} //namespace DllAPI
+} //namespace dllapi
 
 #endif //DLLAPI_H
 

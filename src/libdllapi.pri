@@ -41,7 +41,7 @@
 #    SOURCES = ...
 #
 
-NAME = DllAPI
+NAME = dllapi
 eval($${NAME}_STATICLINK = 0)
 !isEmpty(LIB$$upper($$NAME)_PRI_INCLUDED): {
         error("lib$${NAME}.pri already included")

@@ -2,7 +2,7 @@
 #include "dllapi.h"
 #include "swresample.h" //or "dllapi/swresample/swresample.h" ?
 
-namespace DllAPI {
+namespace dllapi {
 namespace swresample {
 
 #ifdef Q_OS_WIN
@@ -35,4 +35,4 @@ DEFINE_DLLAPI_ARG(0, const char *, swresample_configuration)
 DEFINE_DLLAPI_ARG(0, const char *, swresample_license)
 
 } //namespace swresample
-} //namespace DllAPI
+} //namespace dllapi

@@ -1,5 +1,5 @@
 #include "dllapi/SDL/SDL.h"
-using namespace DllAPI::SDL;
+using namespace dllapi::SDL;
 
 int main()
 {

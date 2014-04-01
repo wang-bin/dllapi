@@ -97,7 +97,7 @@
 #include "libavutil/samplefmt.h"
 //#include "libswresample/version.h"
 
-namespace DllAPI {
+namespace dllapi {
 namespace swresample {
 
 //TODO: what about enum value changes?
@@ -385,6 +385,6 @@ const char *swresample_license(void);
  */
 
 } //namespace swresample
-} //namespace DllAPI
+} //namespace dllapi
 
 #endif /* SWRESAMPLE_SWRESAMPLE_H */

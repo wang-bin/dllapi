@@ -7,7 +7,7 @@ CONFIG   -= app_bundle
 CONFIG *= dllapi-buildlib
 #var with '_' can not pass to pri?
 PROJECTROOT = $$PWD/..
-!include(libDllAPI.pri): error(could not find libDllAPI.pri)
+!include(libdllapi.pri): error(could not find libdllapi.pri)
 preparePaths($$OUT_PWD/../out)
 
 SOURCES += dllapi.cpp

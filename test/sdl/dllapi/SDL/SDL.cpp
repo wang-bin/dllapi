@@ -2,7 +2,7 @@
 #include "dllapi.h"
 #include "SDL.h"
 
-namespace DllAPI {
+namespace dllapi {
 namespace SDL {
 
 DEFINE_DLL_INSTANCE_N("sdl", "SDL", "SDL32", "SDL-1.2", NULL)
@@ -13,4 +13,4 @@ DEFINE_DLLAPI_ARG(4, SDL_Surface*, SDL_SetVideoMode, int, int, int, Uint32)
 DEFINE_DLLAPI_ARG(0, void, SDL_Quit)
 
 } //namespace SDL
-} //namespace DllAPI
+} //namespace dllapi

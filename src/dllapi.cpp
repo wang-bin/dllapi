@@ -1,5 +1,5 @@
 /******************************************************************************
-    DllAPI: call c api by dynamically loading it's library
+    dllapi: call c api by dynamically loading it's library
     Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 
     This library is free software; you can redistribute it and/or
@@ -80,7 +80,7 @@ const std::string kDllSuffix = ".so";
  * 2. lib depended search dirs
  */
 
-namespace DllAPI {
+namespace dllapi {
 
 void DllObject::setFileName(const std::string &name)
 {
@@ -353,4 +353,4 @@ DllObject* library(const char *dllname)
     return it->second;
 }
 
-} //namespace DllAPI
+} //namespace dllapi

@@ -8,7 +8,7 @@ STATICLINK = 0
 PROJECTROOT = $$PWD/../../..
 message($$PROJECTROOT)
 BUILD_DIR=$$OUT_PWD/../../../out
-include($$PROJECTROOT/src/libDllAPI.pri)
+include($$PROJECTROOT/src/libdllapi.pri)
 preparePaths($$OUT_PWD/../../../out)
 
 

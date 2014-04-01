@@ -1,5 +1,5 @@
 /******************************************************************************
-    tst_DllAPI: test application for libDllAPI
+    tst_dllapi: test application for libdllapi
     Copyright (C) 2011-2012 Wang Bin <wbsecg1@gmail.com>
     
     This program is free software; you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 ******************************************************************************/
 
 #include "hello.h"
-using namespace DllAPI::test;
+using namespace dllapi::test;
 
 int main(int argc, char **argv)
 {

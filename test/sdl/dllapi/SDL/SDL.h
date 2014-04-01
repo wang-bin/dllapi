@@ -1,7 +1,7 @@
 #ifndef DLLAPI_SDL_H
 #define DLLAPI_SDL_H
 
-namespace DllAPI {
+namespace dllapi {
 namespace SDL {
 
 //TODO why include SDL/SDL.h will cause link error? otherwise, the other line are not required
@@ -22,6 +22,6 @@ extern DECLSPEC SDL_Surface * SDLCALL SDL_SetVideoMode
             (int width, int height, int bpp, Uint32 flags);
 extern DECLSPEC void SDLCALL SDL_WM_SetCaption(const char *title, const char *icon);
 } //namespace SDL
-} //namespace DllAPI
+} //namespace dllapi
 
 #endif // DLLAPI_SDL_H

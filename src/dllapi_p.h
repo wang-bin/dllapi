@@ -8,7 +8,7 @@
  * in your application, use the api as usual, except that you should include headers like below:
  * #if CONFIG_DLLAPI_CL
  * #include <dllapi/CL/cl.h>
- * using namespace DllAPI:OpenCL;
+ * using namespace dllapi:OpenCL;
  * #else
  * #include <CL/cl.h>
  * #endif
@@ -49,7 +49,7 @@
 #   endif
 #endif
 
-namespace DllAPI {
+namespace dllapi {
 
 
 class DLLAPI_EXPORT DllObject {
@@ -81,7 +81,7 @@ private:
  *TODO: move load, unload, sDllMap, to dllapi_p.h(also map), keep this file empty?
  *if this is empty, then we don't need this. so we can move them here, and
  * this file is only used in xxx.cpp, e.g. dllapi/CL/cl.cpp
- * and dllapi/CL/cl.h is clean, only CL/cl.h content and DllAPI::OpenCL namespace
+ * and dllapi/CL/cl.h is clean, only CL/cl.h content and dllapi::OpenCL namespace
  */
 DLLAPI_EXPORT DllObject* library(const char* dllname); //TODO: return pair? it's already private
 
@@ -225,7 +225,7 @@ DLLAPI_EXPORT void addLibraryNames(const std::string &lib, char** cnames);
             DBG("%s (symbol: %s)\n", DLLAPI_FUNC, sym); \
             if (!mLoaded) \
                 return 0; \
-            return (void*)DllAPI::library(dllid)->resolve(sym); \
+            return (void*)dllapi::library(dllid)->resolve(sym); \
         } \
     private: \
         dll() { \
@@ -248,7 +248,7 @@ DLLAPI_EXPORT void addLibraryNames(const std::string &lib, char** cnames);
             DBG("%s (symbol: %s)\n", DLLAPI_FUNC, sym); \
             if (!mLoaded) \
                 return 0; \
-            return (void*)DllAPI::library(dllid)->resolve(sym); \
+            return (void*)dllapi::library(dllid)->resolve(sym); \
         } \
     private: \
         dll() { \
@@ -270,7 +270,7 @@ DLLAPI_EXPORT void addLibraryNames(const std::string &lib, char** cnames);
             DBG("%s (symbol: %s)\n", DLLAPI_FUNC, sym); \
             if (!mLoaded) \
                 return 0; \
-            return (void*)DllAPI::library(dllname)->resolve(sym); \
+            return (void*)dllapi::library(dllname)->resolve(sym); \
         } \
     private: \
         dll() { mLoaded = testLoad(dllname); } \
@@ -279,5 +279,5 @@ DLLAPI_EXPORT void addLibraryNames(const std::string &lib, char** cnames);
     };
 
 
-} //namespace DllAPI
+} //namespace dllapi
 #endif // DLLAPI_P_H
