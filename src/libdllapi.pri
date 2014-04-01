@@ -42,7 +42,6 @@
 #
 
 NAME = dllapi
-eval($${NAME}_STATICLINK = 0)
 !isEmpty(LIB$$upper($$NAME)_PRI_INCLUDED): {
         error("lib$${NAME}.pri already included")
         unset(NAME)
@@ -50,6 +49,10 @@ eval($${NAME}_STATICLINK = 0)
 eval(LIB$$upper($$NAME)_PRI_INCLUDED = 1)
 
 LIB_VERSION = 1.0.0 #0.x.y may be wrong for dll
+
+# To enable static link, add CONFIG += xxx_static in .qmake.conf (Qt5)
+#use contains, otherwise $$lower($$NAME)_xxx is a test func
+contains(CONFIG, $$lower($$NAME)_static): eval($${NAME}_STATICLINK = 1)
 isEmpty($${NAME}_STATICLINK): eval($${NAME}_STATICLINK = 0) #1 or 0. use static lib or not
 
 TEMPLATE += fakelib
@@ -97,7 +100,7 @@ DEPENDPATH *= $$PROJECT_SRCPATH
         VERSION = $$LIB_VERSION
         DESTDIR= $$PROJECT_LIBDIR
     }
-        TARGET = $$PROJECT_TARGETNAME ##I commented out this before, why?
+        TARGET = $${NAME} #$$PROJECT_TARGETNAME ##I commented out this before, why?
         CONFIG *= create_prl #
         isEqual($${NAME}_STATICLINK, 1) {
                 DEFINES += BUILD_$$upper($$NAME)_LIB #win32-msvc*

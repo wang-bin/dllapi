@@ -162,7 +162,8 @@ static const char* const dllapi_version_string = DLLAPI_VERSION_STR_LONG;
 #  define DLLAPI_EXPORT Q_DECL_EXPORT
 #else
 #  undef DLLAPI_EXPORT
-#  define DLLAPI_EXPORT Q_DECL_IMPORT //only for vc?
+// __declspec(dllimport) is better for dll. but static link can not set __declspec(dllimport).
+#  define DLLAPI_EXPORT //Q_DECL_IMPORT //only for vc?
 #endif
 
 #endif // DLLAPI_GLOBAL_H
