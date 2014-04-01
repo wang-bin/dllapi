@@ -99,6 +99,9 @@ DLLAPI_EXPORT DllObject* library(const char* dllname); //TODO: return pair? it's
 #define DEFINE_DLLAPI_ARG(N, R, name, ...) \
     EXPAND(DEFINE_DLLAPI_SYM_ARG##N(R, name, name, __VA_ARGS__))
 //EXPAND(DEFINE_DLLAPI_SYM_ARG##N(R, name, #name, __VA_ARGS__))
+#define DEFINE_DLLAPI_M_ARG(N, R, M, name, ...) \
+    EXPAND(DEFINE_DLLAPI_M_SYM_ARG##N(R, M, name, name, __VA_ARGS__))
+//EXPAND(DEFINE_DLLAPI_SYM_ARG##N(R, name, #name, __VA_ARGS__))
 
 /*!
  * used by .cpp to define the api
@@ -119,6 +122,21 @@ DLLAPI_EXPORT DllObject* library(const char* dllname); //TODO: return pair? it's
 #define DEFINE_DLLAPI_SYM_ARG11(R, name, sym, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11) DEFINE_DLLAPI_SYM_ARG_T_V(R, name, sym, (P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11), (P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10, P11 p11), (p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11))
 #define DEFINE_DLLAPI_SYM_ARG12(R, name, sym, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12) DEFINE_DLLAPI_SYM_ARG_T_V(R, name, sym, (P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12), (P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10, P11 p11, P12 p12), (p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12))
 #define DEFINE_DLLAPI_SYM_ARG13(R, name, sym, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13) DEFINE_DLLAPI_SYM_ARG_T_V(R, name, sym, (P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13), (P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10, P11 p11, P12 p12, P13 p13), (p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13))
+
+#define DEFINE_DLLAPI_M_SYM_ARG0(R, M, name, sym, ...) DEFINE_DLLAPI_M_SYM_ARG_T_V(R, M, name, sym, (), (), ())
+#define DEFINE_DLLAPI_M_SYM_ARG1(R, M, name, sym, P1) DEFINE_DLLAPI_M_SYM_ARG_T_V(R, M, name, sym, (P1), (P1 p1), (p1))
+#define DEFINE_DLLAPI_M_SYM_ARG2(R, M, name, sym, P1, P2) DEFINE_DLLAPI_M_SYM_ARG_T_V(R, M, name, sym, (P1, P2), (P1 p1, P2 p2), (p1, p2))
+#define DEFINE_DLLAPI_M_SYM_ARG3(R, M, name, sym, P1, P2, P3) DEFINE_DLLAPI_M_SYM_ARG_T_V(R, M, name, sym, (P1, P2, P3), (P1 p1, P2 p2, P3 p3), (p1, p2, p3))
+#define DEFINE_DLLAPI_M_SYM_ARG4(R, M, name, sym, P1, P2, P3, P4) DEFINE_DLLAPI_M_SYM_ARG_T_V(R, M, name, sym, (P1, P2, P3, P4), (P1 p1, P2 p2, P3 p3, P4 p4), (p1, p2, p3, p4))
+#define DEFINE_DLLAPI_M_SYM_ARG5(R, M, name, sym, P1, P2, P3, P4, P5) DEFINE_DLLAPI_M_SYM_ARG_T_V(R, M, name, sym, (P1, P2, P3, P4, P5), (P1 p1, P2 p2, P3 p3, P4 p4, P5 p5), (p1, p2, p3, p4, p5))
+#define DEFINE_DLLAPI_M_SYM_ARG6(R, M, name, sym, P1, P2, P3, P4, P5, P6) DEFINE_DLLAPI_M_SYM_ARG_T_V(R, M, name, sym, (P1, P2, P3, P4, P5, P6), (P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6), (p1, p2, p3, p4, p5, p6))
+#define DEFINE_DLLAPI_M_SYM_ARG7(R, M, name, sym, P1, P2, P3, P4, P5, P6, P7) DEFINE_DLLAPI_M_SYM_ARG_T_V(R, M, name, sym, (P1, P2, P3, P4, P5, P6, P7), (P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7), (p1, p2, p3, p4, p5, p6, p7))
+#define DEFINE_DLLAPI_M_SYM_ARG8(R, M, name, sym, P1, P2, P3, P4, P5, P6, P7, P8) DEFINE_DLLAPI_M_SYM_ARG_T_V(R, M, name, sym, (P1, P2, P3, P4, P5, P6, P7, P8), (P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8), (p1, p2, p3, p4, p5, p6, p7, p8))
+#define DEFINE_DLLAPI_M_SYM_ARG9(R, M, name, sym, P1, P2, P3, P4, P5, P6, P7, P8, P9) DEFINE_DLLAPI_M_SYM_ARG_T_V(R, M, name, sym, (P1, P2, P3, P4, P5, P6, P7, P8, P9), (P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9), (p1, p2, p3, p4, p5, p6, p7, p8, p9))
+#define DEFINE_DLLAPI_M_SYM_ARG10(R, M, name, sym, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10) DEFINE_DLLAPI_M_SYM_ARG_T_V(R, M, name, sym, (P1, P2, P3, P4, P5, P6, P7, P8, P9, P10), (P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10), (p1, p2, p3, p4, p5, p6, p7, p8, p9, p10))
+#define DEFINE_DLLAPI_M_SYM_ARG11(R, M, name, sym, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11) DEFINE_DLLAPI_M_SYM_ARG_T_V(R, M, name, sym, (P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11), (P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10, P11 p11), (p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11))
+#define DEFINE_DLLAPI_M_SYM_ARG12(R, M, name, sym, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12) DEFINE_DLLAPI_M_SYM_ARG_T_V(R, M, name, sym, (P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12), (P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10, P11 p11, P12 p12), (p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12))
+#define DEFINE_DLLAPI_M_SYM_ARG13(R, M, name, sym, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13) DEFINE_DLLAPI_M_SYM_ARG_T_V(R, M, name, sym, (P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13), (P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10, P11 p11, P12 p12, P13 p13), (p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13))
 
 
 
@@ -167,6 +185,17 @@ struct Default<void*> {
         if (!IsVoid<R>::value) return (R)Default<R>::value; \
     }
 
+#define DEFINE_DLLAPI_M_SYM_ARG_T_V(R, M, name, sym, ARG_T, ARG_T_V, ARG_V) \
+    R M name ARG_T_V { \
+        typedef R (*api_t) ARG_T; \
+        static api_t api = (api_t)dll::instance().resolve(#sym); \
+        if (Q_LIKELY(api)) \
+            return api ARG_V; \
+        fprintf(stderr, "resolve symbol '%s' failed!\n", #sym); \
+        static int failed_to_resolve_symbol_##sym = 0; \
+        assert(failed_to_resolve_symbol_##sym); \
+        if (!IsVoid<R>::value) return (R)Default<R>::value; \
+    }
 //TODO: add multiple dll names support. e.g. in unix it's OpenGL, in windows is OpenGL32
 /*
  * TODO: dllname used as id. e.g. on windows, 'OpenAL' may be 'OpenAL32.dll', we should add both OpenAL.dll and OpenAL32.dll. The dllid is also used 
@@ -181,8 +210,10 @@ struct Default<void*> {
  * \param lib
  *  add a list of dll names for \a lib. must end with NULL!
  */
-void addLibraryNames(const std::string& lib, ...);
-void addLibraryNames(const std::string &lib, char** cnames);
+DLLAPI_EXPORT void addLibraryNames(const std::string& lib, ...);
+
+DLLAPI_EXPORT void addLibraryNames(const std::string &lib, char** cnames);
+
 #define DEFINE_DLL_INSTANCE_N(dllid, ...) \
     class dll { \
     public: \

@@ -1,2 +1,2 @@
 TEMPLATE = subdirs
-SUBDIRS = dllapi/libswresample
+#SUBDIRS = dllapi/libswresample

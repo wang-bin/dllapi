@@ -157,7 +157,7 @@ static const char* const dllapi_version_string = DLLAPI_VERSION_STR_LONG;
 #endif
 
 
-#if defined(Q_DLL_LIBRARY)
+#if defined(BUILD_DLLAPI_LIB)
 #  undef DLLAPI_EXPORT
 #  define DLLAPI_EXPORT Q_DECL_EXPORT
 #else
