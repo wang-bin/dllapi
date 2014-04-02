@@ -187,7 +187,7 @@ struct Default<void*> {
 
 #define DEFINE_DLLAPI_M_SYM_ARG_T_V(R, M, name, sym, ARG_T, ARG_T_V, ARG_V) \
     R M name ARG_T_V { \
-        typedef R (*api_t) ARG_T; \
+        typedef R (M *api_t) ARG_T; \
         static api_t api = (api_t)dll::instance().resolve(#sym); \
         if (Q_LIKELY(api)) \
             return api ARG_V; \
@@ -198,7 +198,7 @@ struct Default<void*> {
     }
 //TODO: add multiple dll names support. e.g. in unix it's OpenGL, in windows is OpenGL32
 /*
- * TODO: dllname used as id. e.g. on windows, 'OpenAL' may be 'OpenAL32.dll', we should add both OpenAL.dll and OpenAL32.dll. The dllid is also used 
+ * TODO: dllname used as id. e.g. on windows, 'OpenAL' may be 'OpenAL32.dll', we should add both OpenAL.dll and OpenAL32.dll. The dllid is also used
  * Of cause, we can use platform macros to choose the dll names
  * DEFINE_DLL_INSTANCE_N("OpenAL"
  * #ifdef __WIN32
@@ -222,7 +222,6 @@ DLLAPI_EXPORT void addLibraryNames(const std::string &lib, char** cnames);
             return d; \
         } \
         void* resolve(const char* sym) { \
-            DBG("%s (symbol: %s)\n", DLLAPI_FUNC, sym); \
             if (!mLoaded) \
                 return 0; \
             return (void*)dllapi::library(dllid)->resolve(sym); \
@@ -245,7 +244,6 @@ DLLAPI_EXPORT void addLibraryNames(const std::string &lib, char** cnames);
             return d; \
         } \
         void* resolve(const char* sym) { \
-            DBG("%s (symbol: %s)\n", DLLAPI_FUNC, sym); \
             if (!mLoaded) \
                 return 0; \
             return (void*)dllapi::library(dllid)->resolve(sym); \
@@ -267,7 +265,6 @@ DLLAPI_EXPORT void addLibraryNames(const std::string &lib, char** cnames);
             return d; \
         } \
         void* resolve(const char* sym) { \
-            DBG("%s (symbol: %s)\n", DLLAPI_FUNC, sym); \
             if (!mLoaded) \
                 return 0; \
             return (void*)dllapi::library(dllname)->resolve(sym); \
