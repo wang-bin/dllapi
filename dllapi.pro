@@ -2,7 +2,7 @@ TEMPLATE = subdirs
 CONFIG += ordered
 SUBDIRS = depends libdllapi lib test
 
-libdllapi.file = src/libDllAPI.pro
+libdllapi.file = src/libdllapi.pro
 lib.depends += libdllapi
 test.depends += depends libdllapi
 

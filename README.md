@@ -1,4 +1,4 @@
-# DllAPI
+# dllapi
 
 
 This library helps you use C api in a shared library by dynamically loading instead of linking to it with minimal efforts.
@@ -43,7 +43,7 @@ This step is quite easy. The header is **created once use forever!**
 
 NOTE: you may simply include "SDL/SDL.h" in the namespace and do nothing else if that gives no compile error! 
 
-Or you can include the api you want, including requred consts and macros. The api in the namespace `DllAPI/SDL` are **JUST Copy from original headers**
+Or you can include the api you want, including requred consts and macros. The api in the namespace `dllapi/SDL` are **JUST Copy from original headers**
 
 Here is a simple SDL example:
 
@@ -53,42 +53,28 @@ Here is a simple SDL example:
     #ifndef DLLAPI_SDL_H
     #define DLLAPI_SDL_H
 
-    namespace DllAPI {
+    namespace dllapi {
     namespace SDL {
-    //TODO why include SDL/SDL.h will cause link error? otherwise, the other line are not required
-    //#include "SDL/SDL.h"
-
-    /*
-     *if include SDL/SDL.h is ok, the code below is not requred
-     *copy from SDL headers without any change
-     */
-    #include "SDL/SDL_stdinc.h"
-    #include "SDL/SDL_events.h"
-    #include "SDL/SDL_video.h"
-    #define SDL_INIT_VIDEO      0x00000020
-
-    extern DECLSPEC int SDLCALL SDL_Init(Uint32 flags);
-    extern DECLSPEC void SDLCALL SDL_Quit(void);
-    extern DECLSPEC int SDLCALL SDL_PollEvent(SDL_Event *event);
-    extern DECLSPEC SDL_Surface * SDLCALL SDL_SetVideoMode
-                (int width, int height, int bpp, Uint32 flags);
-    extern DECLSPEC void SDLCALL SDL_WM_SetCaption(const char *title, const char *icon);
+    #include "SDL/SDL.h" //the original SDL header
     } //namespace SDL
-    } //namespace DllAPI
+    } //namespace dllapi
     #endif // DLLAPI_SDL_H
 
 
->dllapi/SDL/SDL.cpp
+>dllapi/SDL/SDL.cpp (some code can be generated from  tools/mkapi)
 
 
     #include "dllapi_p.h"
     #include "dllapi.h"
-    #include "SDL.h"
+    #include "dllapi/SDL/SDL.h"
 
-    namespace DllAPI {
+    namespace dllapi {
     namespace SDL {
 
-    DEFINE_DLL_INSTANCE("SDL")
+    //sdl lib names without prefix'lib' and suffix. it's SDL32.dll, or SDL.dll on windows.
+    //DEFINE_DLL_INSTANCE_N("sdl", "SDL", "SDL32", "SDL-1.2", NULL)
+    static char* sdl_names[] = { "SDL", "SDL32", "SDL-1.2", NULL };
+    DEFINE_DLL_INSTANCE_V("sdl", sdl_names)
     DEFINE_DLLAPI_ARG(1, int, SDL_Init, Uint32)
     DEFINE_DLLAPI_ARG(2, void, SDL_WM_SetCaption, const char*, const char*)
     DEFINE_DLLAPI_ARG(1, int, SDL_PollEvent, SDL_Event*)
@@ -96,24 +82,25 @@ Here is a simple SDL example:
     DEFINE_DLLAPI_ARG(0, void, SDL_Quit)
 
     } //namespace SDL
-    } //namespace DllAPI
+    } //namespace dllapi
 
 
-`DEFINE_DLL_INSTANCE` defines the library name. "SDL" is SDL.dll in windows, libSDL.so in linux and libSDL.dylib in mac.
+`DEFINE_DLL_INSTANCE_N` defines the library names. "SDL" is SDL.dll or SDL32.dll in windows, libSDL.so in linux and libSDL.dylib in mac.
 
 `DEFINE_DLLAPI_ARG` defines the api that declared in the header. Parameters are: number of arguments, return type, api name, parameters' types.
 
 The new header(SDL.h) and source(SDL.cpp) can be used for other code contains SDL api.
 
+
 ####Step 2: just 2 lines in your source code and compile without linking
 
-In this example, in main.cpp, you just replace `#include <SDL/SDL.h>` by `#include "dllapi/SDL/SDL.h"`, and add `using namespace DllAPI::SDL;`. Then compile main.cpp without linking to SDL. Now all SDL functions are loaded dynamically.
+In this example, in main.cpp, you just replace `#include <SDL/SDL.h>` by `#include "dllapi/SDL/SDL.h"`, and add `using namespace dllapi::SDL;`. Then compile main.cpp without linking to SDL. Now all SDL functions are loaded dynamically.
 
 >main.cpp(dynamically loaded symbols):
 
 
     #include "dllapi/SDL/SDL.h"
-    using namespace DllAPI::SDL;
+    using namespace dllapi::SDL;
 
     int main()
     {
@@ -137,7 +124,6 @@ Comparing with linked symbols, calling this dynamically loaded symbol just cost 
 
 ###TODO
 
-1. Write a script to generate the header and source from the original ones automatically. Because this work is mechanical, so a script can do it better.
+1. Write a tool to generate the header and source from the original ones automatically. Now it's `tools/mkapi` which based on clang
 
-2. Remove QtCore depend. I use QLibrary to load a library and resolve symbols. It's not hard to write a simple one. Or use template.
 
