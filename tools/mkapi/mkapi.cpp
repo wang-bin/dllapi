@@ -35,6 +35,23 @@ struct func_info {
     vector<string> argv;
 };
 
+
+//http://stackoverflow.com/questions/11083066/getting-the-source-behind-clangs-ast
+// "T var"
+std::string decl2str(clang::Decl *d, SourceManager *sm) {
+    const char* b = sm->getCharacterData(d->getLocStart());
+    clang::SourceLocation _e(d->getLocEnd());
+    clang::SourceLocation e(clang::Lexer::getLocForEndOfToken(_e, 0, *sm, LangOptions()));
+    return std::string(b, sm->getCharacterData(e)-b);
+}
+
+// "T"
+std::string decl2str_without_var(clang::Decl *d, SourceManager *sm) {
+    const char* b = sm->getCharacterData(d->getLocStart());
+    const char* e = sm->getCharacterData(d->getLocEnd());
+    return std::string(b, e-b);
+}
+
 // By implementing RecursiveASTVisitor, we can specify which AST nodes
 // we're interested in by overriding relevant methods.
 class MyASTVisitor : public RecursiveASTVisitor<MyASTVisitor>
@@ -71,7 +88,16 @@ public:
             fi.return_type = TypeStr;
             unsigned nbp = f->getNumParams();
             for (int i = 0; i < nbp; ++i) {
-                fi.argv.push_back(f->getParamDecl(i)->getOriginalType().getAsString());
+                //getTypeSourceInfo()->getType() and getOriginalType() is the final type. e.g. for size_t, the result may be unsigned int, but we need only size_t
+                //fi.argv.push_back(f->getParamDecl(i)->getTypeSourceInfo()->getType().getAsString());//->getOriginalType().getAsString());
+/*
+                TypeLoc tl = f->getParamDecl(i)->getTypeSourceInfo()->getTypeLoc();
+                SourceLocation sl0 = tl.getBeginLoc();
+                SourceLocation sl1 = tl.getEndLoc();
+                const char* ptr0 = TheRewriter.getSourceMgr().getCharacterData(sl0);
+                const char* ptr1 = TheRewriter.getSourceMgr().getCharacterData(sl1);
+*/
+                fi.argv.push_back(decl2str_without_var(f->getParamDecl(i), &TheRewriter.getSourceMgr()));
             }
             mFuncInfo.push_back(fi);
 #if 0
