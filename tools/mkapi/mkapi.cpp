@@ -35,18 +35,40 @@ struct func_info {
     vector<string> argv;
 };
 
+std::string trim(const std::string& str)
+{
+    string s(str);
+    s.erase(0, s.find_first_not_of(' '));
+    s.erase(s.find_last_not_of(" \n\t\r") + 1);
+    return s;
+}
 
 //http://stackoverflow.com/questions/11083066/getting-the-source-behind-clangs-ast
 // "T var"
+/*
+ * isTokenRange: if the end of this range specifies the start of the last token
+ * isCharRange: if the end of this range specifies the last
+*/
 std::string decl2str(clang::Decl *d, SourceManager *sm) {
+    // (T, U) => "T,,"
+    string text = Lexer::getSourceText(CharSourceRange::getTokenRange(d->getSourceRange()), *sm, LangOptions(), 0);
+    if (text.at(text.size()-1) == ',')
+        return Lexer::getSourceText(CharSourceRange::getCharRange(d->getSourceRange()), *sm, LangOptions(), 0);
+    return text;
     const char* b = sm->getCharacterData(d->getLocStart());
     clang::SourceLocation _e(d->getLocEnd());
+#if 1
     clang::SourceLocation e(clang::Lexer::getLocForEndOfToken(_e, 0, *sm, LangOptions()));
     return std::string(b, sm->getCharacterData(e)-b);
+#else
+    unsigned tokenLen = clang::Lexer::MeasureTokenLength(_e, *sm, LangOptions());
+    return std::string(b, tokenLen);//sm->getCharacterData(e)-b);
+#endif
 }
 
 // "T"
 std::string decl2str_without_var(clang::Decl *d, SourceManager *sm) {
+    return Lexer::getSourceText(CharSourceRange::getCharRange(d->getSourceRange()), *sm, LangOptions(), 0);
     const char* b = sm->getCharacterData(d->getLocStart());
     const char* e = sm->getCharacterData(d->getLocEnd());
     return std::string(b, e-b);
@@ -97,7 +119,7 @@ public:
                 const char* ptr0 = TheRewriter.getSourceMgr().getCharacterData(sl0);
                 const char* ptr1 = TheRewriter.getSourceMgr().getCharacterData(sl1);
 */
-                fi.argv.push_back(decl2str_without_var(f->getParamDecl(i), &TheRewriter.getSourceMgr()));
+                fi.argv.push_back(trim(decl2str_without_var(f->getParamDecl(i), &TheRewriter.getSourceMgr())));
             }
             mFuncInfo.push_back(fi);
 #if 0
