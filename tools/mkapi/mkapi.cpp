@@ -26,6 +26,12 @@
 #include "llvm/Support/Host.h"
 #include "llvm/Support/raw_ostream.h"
 
+
+#include <llvm/ADT/IntrusiveRefCntPtr.h>
+#include <clang/Frontend/FrontendActions.h>
+#include <clang/Frontend/FrontendAction.h>
+#include <clang/Tooling/Tooling.h>
+
 using namespace clang;
 using namespace std;
 
@@ -49,6 +55,7 @@ std::string trim(const std::string& str)
  * isTokenRange: if the end of this range specifies the start of the last token
  * isCharRange: if the end of this range specifies the last
 */
+// TODO: ParmVarDecl::hasDefaultArg. now it's not included
 std::string decl2str(clang::Decl *d, SourceManager *sm) {
     // (T, U) => "T,,"
     string text = Lexer::getSourceText(CharSourceRange::getTokenRange(d->getSourceRange()), *sm, LangOptions(), 0);
@@ -76,10 +83,10 @@ std::string decl2str_without_var(clang::Decl *d, SourceManager *sm) {
 
 // By implementing RecursiveASTVisitor, we can specify which AST nodes
 // we're interested in by overriding relevant methods.
-class MyASTVisitor : public RecursiveASTVisitor<MyASTVisitor>
+class MkApiASTVisitor : public RecursiveASTVisitor<MkApiASTVisitor>
 {
 public:
-    MyASTVisitor(Rewriter &R)
+    MkApiASTVisitor(Rewriter &R)
         : TheRewriter(R)
     {}
 #if 0
@@ -153,10 +160,10 @@ private:
 
 // Implementation of the ASTConsumer interface for reading an AST produced
 // by the Clang parser.
-class MyASTConsumer : public ASTConsumer
+class MkApiASTConsumer : public ASTConsumer
 {
 public:
-    MyASTConsumer(Rewriter &R)
+    MkApiASTConsumer(Rewriter &R)
         : Visitor(R)
     {}
     // Override the method that gets called for each parsed top-level
@@ -170,16 +177,45 @@ public:
     }
     std::vector<func_info> GetFuncInfo() const { return Visitor.GetFuncInfo(); }
 private:
-    MyASTVisitor Visitor;
+    MkApiASTVisitor Visitor;
 };
 
-
+void parse_with_tool(const std::vector<std::string> args);
 int main(int argc, char *argv[])
 {
-    if (argc != 2) {
-        llvm::errs() << "Usage: mkapi filename\n";
+#if 0
+    vector<string> args;
+    args.push_back("tool-executable");
+    for (int i = 1; i < argc; ++i) {
+        args.push_back(argv[i]);
+    }
+    parse_with_tool(args);
+    return 0;
+#endif
+    string user_defines;
+    for (int i = 1; i < argc; ++i) {
+        if (argv[i][0] == '-' && argv[i][1] == 'D') {
+            user_defines += "#define ";
+            char *def = argv[i]+2;
+            char* eq_pos = strchr(def, '=');
+            if (eq_pos) {
+                user_defines += string(def, eq_pos - def);
+                user_defines += " ";
+                user_defines += string(def+1);
+            } else {
+                user_defines += string(def);
+            }
+            user_defines += "\n";
+        }
+    }
+
+
+    if (argc < 2) {
+        llvm::errs() << "Usage: mkapi filename [-Ddefine1 -Ddefine2...]\n";
         return 1;
     }
+
+    string file(argv[1]);
 
     // CompilerInstance will hold the instance of the Clang compiler for us,
     // managing the various objects needed to run the compiler.
@@ -200,12 +236,19 @@ int main(int argc, char *argv[])
     TheCompInst.createPreprocessor();
     TheCompInst.createASTContext();
 
+    if (!user_defines.empty()) {
+        clang::Preprocessor &PP = TheCompInst.getPreprocessor();
+        PP.setPredefines(PP.getPredefines() + user_defines);
+    }
+
+
+    //cout << "predefines: " << TheCompInst.getPreprocessor().getPredefines() << endl;
     // A Rewriter helps us manage the code rewriting task.
     Rewriter TheRewriter;
     TheRewriter.setSourceMgr(SourceMgr, TheCompInst.getLangOpts());
 
     // Set the main file handled by the source manager to the input file.
-    const FileEntry *FileIn = FileMgr.getFile(argv[1]);
+    const FileEntry *FileIn = FileMgr.getFile(file);
     SourceMgr.createMainFileID(FileIn);
     TheCompInst.getDiagnosticClient().BeginSourceFile(
         TheCompInst.getLangOpts(),
@@ -213,7 +256,7 @@ int main(int argc, char *argv[])
 
     // Create an AST consumer instance which is going to get called by
     // ParseAST.
-    MyASTConsumer TheConsumer(TheRewriter);
+    MkApiASTConsumer TheConsumer(TheRewriter);
 
     // Parse the file to AST, registering our consumer as the AST consumer.
     ParseAST(TheCompInst.getPreprocessor(), &TheConsumer,
@@ -232,13 +275,104 @@ int main(int argc, char *argv[])
     stringstream stream;
     for (std::vector<func_info>::const_iterator it = fi.begin(); it != fi.end(); ++it) {
         std::vector<std::string> params = (*it).argv;
+        stream << "DEFINE_DLLAPI_ARG(" << params.size() << ", " << (*it).return_type << ", " << (*it).name;
+        for (int i = 0; i < params.size(); ++i) {
+            stream << ", " << params[i];
+        }
+        stream << ")" << endl;
+    }
+    
+    cout << stream.str() << endl;
+    return 0;
+}
+
+
+// Implementation of the ASTConsumer interface for reading an AST produced
+// by the Clang parser.
+class MkApiASTConsumer2 : public ASTConsumer
+{
+public:
+    MkApiASTConsumer2(clang::CompilerInstance &CI, llvm::StringRef InFile)
+        : mpVisitor(0)
+    {
+        CI.setASTConsumer(this);
+        //cout << "predefines: " << CI.getPreprocessor().getPredefines() << endl;
+        // A Rewriter helps us manage the code rewriting task.
+        mRewriter.setSourceMgr(CI.getSourceManager(), CI.getLangOpts());
+        mpVisitor = new MkApiASTVisitor(mRewriter);
+    }
+    ~MkApiASTConsumer2() {
+        delete mpVisitor;
+    }
+
+    // Override the method that gets called for each parsed top-level
+    // declaration.
+    virtual bool HandleTopLevelDecl(DeclGroupRef DR) {
+        for (DeclGroupRef::iterator b = DR.begin(), e = DR.end();
+             b != e; ++b)
+            // Traverse the declaration using our AST visitor.
+            mpVisitor->TraverseDecl(*b);
+        return true;
+    }
+    std::vector<func_info> GetFuncInfo() const { return mpVisitor->GetFuncInfo(); }
+private:
+    Rewriter mRewriter;
+    MkApiASTVisitor *mpVisitor;
+};
+
+class MkApiAction : public clang::ASTFrontendAction {
+protected:
+    virtual clang::ASTConsumer *CreateASTConsumer(clang::CompilerInstance &CI, llvm::StringRef InFile) {
+        CI.getFrontendOpts().SkipFunctionBodies = true;
+        CI.getPreprocessor().enableIncrementalProcessing(true);
+        CI.getPreprocessor().SetSuppressIncludeNotFoundError(true);
+        CI.getLangOpts().DelayedTemplateParsing = true;
+
+        //enable all the extension
+        CI.getLangOpts().MicrosoftExt = true;
+        CI.getLangOpts().DollarIdents = true;
+#if CLANG_VERSION_MAJOR != 3 || CLANG_VERSION_MINOR > 2
+        CI.getLangOpts().CPlusPlus11 = true;
+#else
+        CI.getLangOpts().CPlusPlus0x = true;
+#endif
+        CI.getLangOpts().CPlusPlus1y = true;
+        CI.getLangOpts().GNUMode = true;
+
+        /* Proxy that changes some errors into warnings  */
+        //CI.getDiagnostics().setClient(new MocDiagConsumer{CI.getDiagnostics().takeClient()});
+
+        return new MkApiASTConsumer2(CI, InFile);
+    }
+
+public:
+    // CHECK
+    virtual bool hasCodeCompletionSupport() const { return true; }
+};
+
+
+//https://chromium.googlesource.com/native_client/pnacl-clang/+/master/unittests/Tooling/ToolingTest.cpp
+void parse_with_tool(const std::vector<std::string> args)
+{
+    llvm::IntrusiveRefCntPtr<clang::FileManager> Files(new clang::FileManager(clang::FileSystemOptions()));
+    clang::ASTFrontendAction *action = new MkApiAction;
+    clang::tooling::ToolInvocation Invocation(args, action, Files.getPtr());
+
+    Invocation.run();
+
+
+    ASTConsumer ac = action->getCompilerInstance().getASTConsumer();
+    std::vector<func_info> fi = static_cast<MkApiASTConsumer2*>(&ac)->GetFuncInfo();
+    //stringstream stream;
+    for (std::vector<func_info>::const_iterator it = fi.begin(); it != fi.end(); ++it) {
+        std::vector<std::string> params = (*it).argv;
         cout << "DEFINE_DLLAPI_ARG(" << params.size() << ", " << (*it).return_type << ", " << (*it).name;
         for (int i = 0; i < params.size(); ++i) {
             cout << ", " << params[i];
         }
         cout << ")" << endl;
     }
-    
-    cout << stream.str() << endl;
-    return 0;
+    cout << "parse_with_tool end" <<endl;
+
+    //cout << stream.str() << endl;
 }

@@ -10,6 +10,7 @@ LLVM_LDFLAGS=$(LLVM_LIBS) $(shell llvm-config --ldflags)
 #why llvm-config --libs --ldflags xxx will link error?
 #-lLLVMSupport -lLLVMMC 
 CLANG_LDFLAGS = \
+  -lclangTooling \
   -lclangFrontendTool -lclangFrontend -lclangDriver \
   -lclangSerialization -lclangCodeGen -lclangParse \
   -lclangSema -lclangStaticAnalyzerFrontend \
@@ -26,7 +27,7 @@ all: $(TARGET)
 	$(CXX) $(CXXFLAGS) -c $^
 
 $(TARGET): $(OBJS)
-	$(CXX) -o $@ $^  $(LDFLAGS) 
+	$(CXX) -o $@ $^  $(LDFLAGS)
 
 clean:
 	rm -rf *.o *.ll $(TARGET)
